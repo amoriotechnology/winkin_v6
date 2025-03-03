@@ -156,13 +156,13 @@ if(!empty($edit_appoint)) {
                                                 <div class="d-flex justify-content-center">
                                                     <ul class="nav nav-tabs mb-3 tab-style-6 rounded border-dark mobile_viewtabs" id="myTab1" role="tablist" style="background-color: #dfdedd; height: 55px;">
                                                         <li class="nav-item" role="presentation"> 
-                                                            <label for="courtA" class="active court_btn nav-link w-lg rounded text-center" data-value="courtA" data-bs-toggle="tab" role="tab"> <b>Court A</b> </label>
+                                                            <label for="courtA" class="<?= ($appservs == 'courtA' || $appservs == "") ? 'active' : '' ?> court_btn nav-link w-lg rounded text-center" data-value="courtA" data-bs-toggle="tab" role="tab"> <b>Court A</b> </label>
                                                             <input name="admincourt" class="d-none fs-5 border-dark form-check-input form-checked-primary rounded" type="radio" value="courtA" data-duration="<?= !empty($cmpy_info['fld_court_duration']) ? $cmpy_info['fld_court_duration'] : '' ?>" data-rate="<?= !empty($cmpy_info['fld_court_rate']) ? $cmpy_info['fld_court_rate'] : '' ?>" id="courtA" checked <?= ( (!empty($appservs) && ($appservs == 'courtA') ) ? 'checked' : ''); ?>>
                                                             <input type="hidden" name="court_dura[courtA]" value="<?= !empty($cmpy_info['fld_court_duration']) ? $cmpy_info['fld_court_duration'] : '' ?>">
                                                             <input type="hidden" name="court_rate[courtA]" value="<?= !empty($cmpy_info['fld_court_rate']) ? $cmpy_info['fld_court_rate'] : '' ?>">
                                                         </li>
                                                         <li class="nav-item" role="presentation"> 
-                                                            <label for="courtB" class="court_btn nav-link w-lg rounded text-center" data-value="courtB" data-bs-toggle="tab" role="tab"> <b>Court B</b> </label> &nbsp;
+                                                            <label for="courtB" class="<?= ($appservs == 'courtB') ? 'active' : '' ?> court_btn nav-link w-lg rounded text-center" data-value="courtB" data-bs-toggle="tab" role="tab"> <b>Court B</b> </label> &nbsp;
                                                             <input name="admincourt" class="d-none fs-5 border-dark form-check-input form-checked-primary rounded" type="radio" value="courtB" data-duration="<?= !empty($cmpy_info['fld_court_duration']) ? $cmpy_info['fld_court_duration'] : '' ?>" data-rate="<?= !empty($cmpy_info['fld_court_rate']) ? $cmpy_info['fld_court_rate'] : '' ?>" id="courtB" <?= ( (!empty($appservs) && ($appservs == 'courtB') ) ? 'checked' : ''); ?>>
                                                             <input type="hidden" name="court_dura[courtB]" value="<?= !empty($cmpy_info['fld_court_duration']) ? $cmpy_info['fld_court_duration'] : '' ?>">
                                                             <input type="hidden" name="court_rate[courtB]" value="<?= !empty($cmpy_info['fld_court_rate']) ? $cmpy_info['fld_court_rate'] : '' ?>">
@@ -188,7 +188,7 @@ if(!empty($edit_appoint)) {
                                                   <ul class="calendar-week"></ul>
                                                   <ul class="calendar-days"></ul>
                                                 </div>
-                                                <input type="hidden" name="court_date" id="court_date" value="<?= CURDATE; ?>">
+                                                <input type="hidden" name="court_date" id="court_date" value="<?= $app_date; ?>">
                                             </div>
 
                                             <div class="col-xl-6">
@@ -254,8 +254,8 @@ if(!empty($edit_appoint)) {
                                                         <label for="paymode"> <b>Payment Mode</b></label>
                                                         <select name="pay_mode" class="form-select" id="paymode">
                                                             <option value="Online">Online</option>
-                                                            <option value="cash">Cash</option>
-                                                            <option value="upi">Upi</option>
+                                                            <option value="Cash">Cash</option>
+                                                            <option value="Upi">Upi</option>
                                                         </select>
                                                     </div>
                                                     <div class="col-xl-12 UPI d-none">
@@ -395,7 +395,7 @@ $(document).ready(function() {
         $("#book_date_show").html(displayDate(new Date()));
     });
 
-
+    $("#viewTimes").html('');
     var clickcount = 0;
     var allUnchecked = false;
     $('body').on('click', ".time-btn0, input[name='times[]']", function() {
@@ -430,6 +430,7 @@ $(document).ready(function() {
             if(clickcount >= 1 && (cont_td == false || cont_td == undefined)) {
                 $(input).prop('checked', false);
                 ctiming = [];
+                var duration = 0; var rate = 0;
                 $("input[name='times[]']:checked").each(function() {
                     ctiming.push($(this).val());
                     duration += 30;
@@ -520,6 +521,7 @@ $(document).ready(function() {
 
         $('#courtCal').empty();
         if(courts != "") {
+            $("#viewTimes").html('');
             getdetails('<?= base_url('getCourtTiming') ?>', {[csrfName]: csrfHash, court:courts, date:appdate, apptime:apptime}, 'courtCal');
         }
     });
@@ -546,9 +548,9 @@ $(document).ready(function() {
 
         $('#courtCal').empty();
         if(selectedDate != "" && court != "") {
+            $("#viewTimes").html('');
             getdetails('<?= base_url('getCourtTiming') ?>', {[csrfName]:csrfHash, court:court, date:selectedDate, apptime:apptime}, 'courtCal');
         }
-
     });
 
 
@@ -925,7 +927,7 @@ function getCustomerDetails(id) {
 
 function getTimeRate(starttime, duration, rate) {
 
-    var viewtimes = "Selected Timings: <b>"+starttime+" - "+DisplayTime(starttime, parseInt(duration))+"</b> <br> Rate: <b>"+rate+"</b>";
+    var viewtimes = "Selected Timings: <b>"+starttime+" - "+DisplayTime(starttime, parseInt(duration))+"</b> <br> Amount ₹: <b>"+rate+"</b>";
     viewtimes = (starttime == undefined) ? "" : viewtimes;
     $("#viewTimes").html(viewtimes);
 }

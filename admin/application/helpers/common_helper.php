@@ -478,10 +478,11 @@ use Razorpay\Api\Api;
 									                    }
 									                    if(isset($data['wish_msg'])) {
 									                    	$template .= '<tr>
-											                            <td style="font-family:Poppins,Arial,sans-serif; font-size:20px; text-align:center">
-											                              <p style="margin:0; color:#a20c25;font-weight:600">'.$data['wish_msg'].'</p>
-											                            </td>
-											                          </tr>';
+																			<td style="font-family:Poppins,Arial,sans-serif; font-size:20px; text-align:center">
+																				<p style="margin:0; color:#a20c25;font-weight:600">Your OTP for password reset is: <strong>'.$data['wish_msg'].'</strong></p>
+																				<p style="margin:10px 0; color:#000; font-size:16px;">Please use this One-Time Password (OTP) to reset your password. Do not share this code with anyone for security reasons. </p>
+																			</td>
+																		</tr>';
 									                    }
 								            $template .= '</table>
 								                      </td>
@@ -650,9 +651,8 @@ use Razorpay\Api\Api;
 								                 $template .=  '<p class="text-white">Payment successfully <small><br>processed on '.showDate(CURDATE).'</small></p>';
 												}else{
                                                  $template .=  '<p class="text-white">Payment is Pending </p>';
-											
 												}
-												 $template .=  '<h1>₹'.round($amount, 2).'</h1>
+												$template .=  '<h1>₹'.round($amount, 2).'</h1>
 								              </div>
 
 								              <div class="div-right">
@@ -660,13 +660,9 @@ use Razorpay\Api\Api;
 								              </div>
 								          </div>';
                                         if ($data['payment_method'] !== '') {
-								           $template .=  '<p>
-								            Your payment against WINKIN for ₹'.round($amount, 2).' is successful.
-								          </p>';
+								           $template .=  '<p> Your payment against WINKIN for ₹'.round($amount, 2).' is successful.</p>';
 										}else{
-											 $template .=  '<p>
-								            Your payment against WINKIN for ₹'.round($amount, 2).' is pending.
-								          </p>';
+											$template .=  '<p> Your payment against WINKIN for ₹'.round($amount, 2).' is pending. </p>';
 										}
 							  
 								           $template .='<div class="container">
@@ -942,7 +938,7 @@ use Razorpay\Api\Api;
 	}
 
 	// Client Ip Address
-	if(!function_exists('getClientIp')){
+	if(!function_exists('getClientIp')) {
 	    function getClientIp() {
 	        $ip = '';
 	        if (array_key_exists('HTTP_CLIENT_IP', $_SERVER)) {
@@ -952,8 +948,21 @@ use Razorpay\Api\Api;
 	        } elseif (array_key_exists('REMOTE_ADDR', $_SERVER)) {
 	            $ip = $_SERVER['REMOTE_ADDR'];
 	        }
-
 	        return $ip;
+	    }
+	}
+
+	// Align time order asc
+	if(!function_exists('ArrayTimeAlign')) {
+	    function ArrayTimeAlign($arrayValue) {
+	        usort($arrayValue, function($a, $b) {
+				// Convert time string to 24-hour format and compare
+				$timeA = DateTime::createFromFormat('h:i A', $a[3])->format('H:i');
+				$timeB = DateTime::createFromFormat('h:i A', $b[3])->format('H:i');
+				
+				return strcmp($timeA, $timeB);
+			});
+	        return $arrayValue;
 	    }
 	}
 

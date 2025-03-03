@@ -27,7 +27,7 @@
     <thead>
         <tr>
             <td><b>Booking ID:</b></td>
-            <td><b>Booking Date:</b></td>
+            <td><b>Slot Date:</b></td>
             <td><b>Paymode:</b></td>
         </tr>
         <tr>
@@ -42,10 +42,10 @@
     <thead align="center">
         <tr>
             <th>S.No</th>
-            <th>AREA</th>
+            <th>COURT</th>
             <th>HSN</th>
             <th>DURATION</th>
-            <th>TIMING</th>
+            <th>TIMING(s)</th>
             <th>AMOUNT (Rs.)</th>
         </tr>
     </thead>
@@ -53,7 +53,7 @@
         <?php
             if(!empty($records[$appkey]['serv_data'])) {
             $subtot = 0;
-            foreach($records[$appkey]['serv_data'] as $key => $item) {
+            foreach(ArrayTimeAlign($records[$appkey]['serv_data']) as $key => $item) {
             $i = 0;
             $courtname = (($item[0] == 'courtA') ? 'Court A' : 'Court B');
         ?>
@@ -91,7 +91,7 @@
             </tr>
             <tr align="right">
                 <th colspan="5">PAID :</th>
-                <td align="center"> <?= round(($records[$appkey]['app_rate'] - $records[$appkey]['coup_amt']), 2); ?> </td>
+                <td align="center"> <?= round(($records[$appkey]['app_rate'] - $records[$appkey]['app_balance']), 2); ?> </td>
             </tr>
            
         </tr>

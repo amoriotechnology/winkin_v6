@@ -8,7 +8,6 @@ use Dompdf\Options;
 class Backend extends CI_Controller {
 
 	public $load, $session, $input;
-
 	public function __construct() {
 		parent::__construct();
 		$this->load->model('Common_model');
@@ -38,6 +37,7 @@ class Backend extends CI_Controller {
 	}
 
 	public function index() {
+
 		$start = date('Y-m-01');
 		$end = date('Y-m-31');
 		$today = date('Y-m-d');
@@ -61,7 +61,6 @@ class Backend extends CI_Controller {
 		/* get till date revenue value */
 		$till_sales = $this->Common_model->RawSQL("SELECT SUM(`fld_prate`) as `till_paid` FROM `payments` WHERE `fld_pdate` <= '".$today."' ");
 
-	
 		$cust_cnt = $this->Common_model->getCount('customers', ['fld_status' => 'Active']);
 
 		$staff_cnt = $this->Common_model->getCount('users', ['fld_ustatus' => 'Active', 'fld_uroles' => 2]);
@@ -603,6 +602,7 @@ class Backend extends CI_Controller {
 
 		$history = $paymode;
 		if (!empty($appid)) {
+			
             $check = ExistorNot('customers', ['fld_phone' => $custphone]);
 			$cust_rec = $this->Common_model->GetDatas('customers', 'fld_id, fld_custid', ['fld_id !=' => ''], "`fld_id` DESC");
 			$newduration = $newrate = 0;
@@ -661,10 +661,8 @@ class Backend extends CI_Controller {
 					'fld_arate' => $rate,
 					'fld_apaymode' => $paymode,
 					'fld_abalance' => $balance,
-					'fld_anotes' => $serv_notes,
 					'fld_gst_amt' => $gst_amount,
 					'fld_pay_charge' => $payment_amount,
-					'fld_apaymode' => $paymode,
 				];
 
 			logEntry('Reschedule Appointment', 'Court Status', 'Reschedule Appointment successfully', 'Update', json_encode($timings));
@@ -874,7 +872,6 @@ class Backend extends CI_Controller {
 	public function updatePayment() {
 		$id = trim($this->input->post('id', TRUE));
 		$payamount = trim($this->input->post('payamount', TRUE));
-
 		$payments = $this->Common_model->GetDatas('payments', '*', ['fld_appid' => $id]);
 
 		$paid = ( (float)$payments[0]['fld_ppaid'] + $payamount );

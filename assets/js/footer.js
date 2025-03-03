@@ -91,6 +91,20 @@ function TimeAlign(timeArray) {
     return timeArray;
 }
 
+function arrayAlign(arrayValue) {
+    var check = $.isArray(arrayValue);
+    if(check == true) {
+        arrayValue.sort(function(a, b) {
+            let timeA = new Date('01/01/2000 ' + a[3]);
+            let timeB = new Date('01/01/2000 ' + b[3]);
+            return timeA - timeB;
+        });
+        return arrayValue;
+    } else {
+        return arrayValue;
+    }
+}
+
 function MinutesToHour(minutes) {
     var Hours = parseInt(parseFloat(minutes) / 60);
     var Mints = (parseFloat(minutes) - (Hours * 60));
@@ -152,8 +166,6 @@ flatpickr(".daterange",{
     maxDate: "today",
 });
 
-
-
 function displayDate(date) {
 
     var displayDate = "";
@@ -177,7 +189,6 @@ function displayDate(date) {
     }
     return displayDate;
 }
-
 
 function displayDateOnly(date) {
 
@@ -297,7 +308,6 @@ function removeValidation(values) {
     return true;
 }
 
-
 function getdetails(url, datas, input_id) {
     $.ajax({
         url: url,
@@ -307,7 +317,6 @@ function getdetails(url, datas, input_id) {
         error: function(xhr, status, error) { console.log(error); }
     });
 }
-
 
 function restrictAmt(amount) {
 
@@ -327,19 +336,16 @@ function restrictAmt(amount) {
     return action;
 }
 
-
 flatpickr(".dob_datepicker",{
     dateFormat:"d/m/Y",
     disableMobile:!0,
     maxDate: "Jan 01/2006",
 });
 
-
 flatpickr(".anni_datepicker",{
     dateFormat:"d/m/Y",
     disableMobile:!0,
     maxDate: "today",
 });
-
 
 function preg_match(regex, str) { return (new RegExp(regex).test(str)); }
