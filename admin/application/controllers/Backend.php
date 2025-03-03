@@ -380,6 +380,25 @@ class Backend extends CI_Controller {
 
 	    $startTime = new DateTime($mnt_frm_time);
 	    $endTime   = new DateTime($mnt_end_time);
+        
+        // Start time is greater than End time Condition
+	    if ($startTime >= $endTime) {
+		    echo json_encode([
+		        'status' => 400,
+		        'alert_msg' => 'Start time must be earlier than end time.'
+		    ]);
+		    return;
+		}
+        
+        // Start Time and End time is equal Condition
+	    if ($startTime == $endTime) {
+		    echo json_encode([
+		        'status' => 400,
+		        'alert_msg' => 'Start time and end time cannot be the same.'
+		    ]);
+		    return;
+		}
+
 	    $interval  = new DateInterval('PT30M');
 	    $timeSlots = [];
 
