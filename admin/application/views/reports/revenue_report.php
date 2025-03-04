@@ -1,7 +1,6 @@
 <!-- Start::app-content -->
 <div class="main-content app-content">
     <div class="container-fluid">
-
         <!-- Page Header -->
         <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
@@ -9,7 +8,6 @@
             </div> 
         </div>
         <!-- Page Header Close -->
-
         <!--Start:: row-7 -->
         <div class="row">
             <div class="col-xl-12">
@@ -71,26 +69,20 @@
             </div>
         </div>
         <!--End:: row-7 -->
-        
     </div>
 </div>
 <!-- End::content  -->
-
 <script type="text/javascript">
 var revenueReport;
 $(document).ready(function() {
-
     var csrfName = "<?= $this->security->get_csrf_token_name() ?>";
     var csrfHash = "<?= $this->security->get_csrf_hash() ?>";
-
     $("#datefilter").daterangepicker({
         locale: { format: 'DD/MM/YYYY' },
     });
-
     if ($.fn.DataTable.isDataTable('#revenue_list')) {
         $('#revenue_list').DataTable().clear().destroy();
     }
-
     revenueReport = $('#revenue_list').DataTable({
         responsive: 0,
         "processing": true,
@@ -159,9 +151,7 @@ $(document).ready(function() {
                 "customize": function(doc) {
                     if (doc.content.length > 1 && doc.content[1].table) {
                         let tableBody = doc.content[1].table.body;
-
                         doc.content[1].table.widths = Array(tableBody[0].length).fill('*');
-
                         doc.content[1].layout = {
                             hLineWidth: function(i, node) { return 0.5; }, 
                             vLineWidth: function(i, node) { return 0.5; }, 
@@ -172,33 +162,25 @@ $(document).ready(function() {
                             paddingTop: function(i, node) { return 3; },
                             paddingBottom: function(i, node) { return 3; }
                         };
-
                         doc.pageMargins = [10, 10, 10, 10];
-
                         doc.styles.tableHeader = {
                             alignment: 'center',
                             bold: true,
                             fontSize: 9,
                             fillColor: '#f3f3f3' 
                         };
-
                         doc.styles.tableBodyOdd = { alignment: 'center' };
                         doc.styles.tableBodyEven = { alignment: 'center' };
-
                         doc.defaultStyle.fontSize = 9;
-
                         let totalAmount = $('#totalAmount').text();
                         let totalGST = $('#totalGST').text();
                         let totalTotal = $('#totalTotal').text();
-
                         let footerRow = [
                             { text: 'Total', alignment: 'right', bold: true, colSpan: 7 }, '', '', '', '', '', '',
                             { text: totalAmount, alignment: 'center', bold: true },
                             { text: totalGST, alignment: 'center', bold: true },
-                        
                             { text: totalTotal, alignment: 'center', bold: true }
                         ];
-
                         tableBody.push(footerRow);
                     }
                 }
@@ -213,22 +195,18 @@ $(document).ready(function() {
                         .css('text-align', 'center')
                         .css('margin', '0')
                         .css('padding', '0');
-
                     $(win.document.body).find('table')
                         .addClass('compact')
                         .css('font-size', 'inherit')
                         .css('width', '100%');
-
                     $(win.document.body).find('h1')
                         .css('font-size', '16px')
                         .css('text-align', 'center')
                         .css('margin', '0 0 10px 0');
-
                     var rows = $(win.document.body).find('table tbody tr');
                     rows.each(function() {
                         if ($(this).find('td').length === 0) { $(this).remove(); }
                     });
-
                     var css = '@page { size: landscape; }';
                     var style = document.createElement('style');
                     style.type = 'text/css';
@@ -239,33 +217,25 @@ $(document).ready(function() {
                         style.appendChild(document.createTextNode(css));
                     }
                     win.document.head.appendChild(style);
-
                     var api = $('#revenue_list').DataTable();
                     var totalAmount = api.column(9).data().reduce(function(a, b) {
                         return parseFloat(a) + parseFloat(b);
                     }, 0);
-
                     var totalGST = api.column(10).data().reduce(function(a, b) {
                         return parseFloat(a) + parseFloat(b);
                     }, 0);
-
-           
-
                     var totalTotal = api.column(11).data().reduce(function(a, b) {
                         console.log(totalTotal);
                         return parseFloat(a) + parseFloat(b);
                     }, 0);
-
                     var footerRow = `
                         <tr style="font-weight: bold;">
                             <td colspan="8" style="font-weight: bold;text-align: right !important;">Total</td>
                             <td style="font-weight: bold;">${totalAmount.toFixed(2)}</td>
                             <td style="font-weight: bold;">${totalGST.toFixed(2)}</td>
-                       
                             <td style="font-weight: bold;">${totalTotal.toFixed(2)}</td>
                         </tr>
                     `;
-
                     $(win.document.body).find('table tbody').append(footerRow);
                     $(win.document.body).find('div:last-child').css('page-break-after', 'auto');
                 }
@@ -278,35 +248,26 @@ $(document).ready(function() {
         ],
         "footerCallback": function(row, data, start, end, display) {
             var api = this.api();
-
             var totalAmount = api.column(9).data().reduce(function(a, b) {
                 return parseFloat(a) + parseFloat(b);
             }, 0);
-
             var totalGST = api.column(10).data().reduce(function(a, b) {
                 return parseFloat(a) + parseFloat(b);
             }, 0);
-
-        
-
             var totalTotal = api.column(11).data().reduce(function(a, b) {
                 return parseFloat(a) + parseFloat(b);
             }, 0);
-
             $(api.column(9).footer()).html(totalAmount.toFixed(2));
             $(api.column(10).footer()).html(totalGST.toFixed(2));
          //   $(api.column(9).footer()).html(totalDiscount.toFixed(2));
             $(api.column(11).footer()).html(totalTotal.toFixed(2));
         }
     });
-
     $('#search').on('click', function() {
         revenueReport.draw();
     });
-
     $('#revenue_list thead').on('keyup change', '.column-search', function() {
         revenueReport.draw();
     });
-
 });
 </script>

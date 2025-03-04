@@ -73,9 +73,9 @@ class Backend extends CI_Controller {
         $bookingCount = $this->Common_model->totalBookingCount() ?: 0;
 
         /*Revenue Data passing in charts */
-        $revenueData = $this->Common_model->GetJoinDatas('appointments A', 'payments P', "A.fld_aid = P.fld_appid", "DATE_FORMAT(A.fld_booked_date, '%Y-%m') AS month, SUM(P.fld_prate) AS total_revenue", ["YEAR(A.fld_booked_date)" => date('Y')], "A.fld_atype IS NULL", "month");
-
-        if (empty($revenueData)) {$revenueData = [];}
+        $revenueData = $this->Common_model->GetJoinDatas('appointments A', 'payments P', "A.fld_aid = P.fld_appid", "DATE_FORMAT(A.fld_booked_date, '%Y-%m') AS month, SUM(P.fld_prate) AS total_revenue", ["YEAR(P.fld_pdate)" => date('Y')], "A.fld_atype IS NULL", "month",["A.fld_astatus" => ['Pending', 'Cancelled']]);
+      
+       if (empty($revenueData)) {$revenueData = [];}
 
         $data = [
             'info'               => checkLogin(),
@@ -831,8 +831,7 @@ class Backend extends CI_Controller {
                     (SELECT SUM(P.fld_ppaid) FROM payments P WHERE P.fld_appid = A.fld_aid) AS paid,
                     (SELECT P.fld_pbalance FROM payments P WHERE P.fld_appid = A.fld_aid ORDER BY P.fld_pdate DESC LIMIT 1) AS balance";
         $result = $this->Common_model->getAppointment($table1, $table2, $table3, $table4, $table5, $table1cond, $table2cond, $table3cond, $table4cond, $select, "A.fld_aid DESC", 10, 0, $AppointID);
-        echo $this->db->last_query();die;
-        $data = [
+        $data   = [
             'appkey'    => $AppointID,
             'cmpy_info' => getSettingData(),
             'records'   => mergeAppointment($result),

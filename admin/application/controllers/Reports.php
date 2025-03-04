@@ -262,7 +262,7 @@ class Reports extends CI_Controller {
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
         $searchColumns = $this->input->post('search_columns', TRUE);
         $totalItems    = 0;
-       $col_where = ['A.fld_atype' => NULL];
+        $col_where = ['A.fld_atype'  => NULL];
         if (! empty($searchColumns)) {
             foreach ($searchColumns as $columnIndex => $searchValue) {
                 if (! empty($searchValue)) {
@@ -308,6 +308,7 @@ class Reports extends CI_Controller {
                 'P.fld_pdate <=' => $endfilter,
             ];
         }
+        $this->db->where_not_in('A.fld_astatus', ['Pending', 'Cancelled']);
         $where = array_merge($col_where, $dateWhere);
         $table1     = 'appointments A';
         $table2     = 'customers C';
