@@ -301,7 +301,7 @@ use Razorpay\Api\Api;
 						'cgen' => $rec['fld_gender'],
 						'cdob' => $rec['fld_dob'],
 						'mari_sts' => $rec['fld_maritial_sts'],
-						'fld_staff_designation' => $rec['fld_staff_designation'],
+						// 'fld_staff_designation' => $rec['fld_staff_designation'],
 						'canniversary' => $rec['fld_anniversary'],
 						'caddr' => $rec['fld_address'],
 						'app_amount' => 0,
@@ -478,10 +478,11 @@ use Razorpay\Api\Api;
 									                    }
 									                    if(isset($data['wish_msg'])) {
 									                    	$template .= '<tr>
-											                            <td style="font-family:Poppins,Arial,sans-serif; font-size:20px; text-align:center">
-											                              <p style="margin:0; color:#a20c25;font-weight:600">'.$data['wish_msg'].'</p>
-											                            </td>
-											                          </tr>';
+																			<td style="font-family:Poppins,Arial,sans-serif; font-size:20px; text-align:center">
+																				<p style="margin:0; color:#a20c25;font-weight:600">Your OTP for password reset is: <strong>'.$data['wish_msg'].'</strong></p>
+																				<p style="margin:10px 0; color:#000; font-size:16px;">Please use this One-Time Password (OTP) to reset your password. Do not share this code with anyone for security reasons. </p>
+																			</td>
+																		</tr>';
 									                    }
 								            $template .= '</table>
 								                      </td>
@@ -645,56 +646,44 @@ use Razorpay\Api\Api;
 								  </head><body style="background-color: #F2F2F2;"><center><div style="max-width: 680px; margin: 0 auto;" class="email-container">';
 								          
 								            $template .=  '<div class="content bg-primary">
-								              <div class="div-left">';
-											    if ($data['payment_method'] !== '') {
-								                 $template .=  '<p class="text-white">Payment successfully <small><br>processed on '.showDate(CURDATE).'</small></p>';
-												}else{
-                                                 $template .=  '<p class="text-white">Payment is Pending </p>';
-											
-												}
-												 $template .=  '<h1>₹'.round($amount, 2).'</h1>
-								              </div>
+																<table class="width: 100%">';
+																	if ($data['payment_method'] !== '') {
+																		$template .=  '<tr> <th> Payment successfully processed on '.showDate(CURDATE).' </th> </tr>';
+																	}else{
+																		$template .=  '<tr> <th> Payment is Pending </th> </tr>';
+																	}
+																	$template .=  '<tr> <th> <h2> ₹'.round($amount, 2).'</th> </tr> </h2>
+																</table>
+															</div>';
 
-								              <div class="div-right">
-								                <img src="data:image/png;base64,'.base64_encode(file_get_contents('../assets/images/company_imgs/verified.png')).'"  width="50%" height="50%">
-								              </div>
-								          </div>';
                                         if ($data['payment_method'] !== '') {
-								           $template .=  '<p>
-								            Your payment against WINKIN for ₹'.round($amount, 2).' is successful.
-								          </p>';
+								           $template .=  '<p> Your payment against WINKIN for ₹'.round($amount, 2).' is successful.</p>';
 										}else{
-											 $template .=  '<p>
-								            Your payment against WINKIN for ₹'.round($amount, 2).' is pending.
-								          </p>';
+											$template .=  '<p> Your payment against WINKIN for ₹'.round($amount, 2).' is pending. </p>';
 										}
+
+										$template .= '<table width="100%" border="0">
+														<tr class="container">
+															<th> BOOKING ID : <span class="text-muted">#'.$data['appoint_id'].'</span> </th>
+														</tr>';
+														if ($data['payment_method'] !== '') {
+															$template .= '<tr class="container"> <th> AMOUNT ₹: <span class="text-muted">'.round($amount, 2).'</span> </th> </tr>
+															<tr class="container"><th> PAYMENT MODE : <span class="text-muted">'.$data['payment_method'].'</span> </th></tr>';
+														}
+
+										$template .= '<tr class="container">
+															<th> COURT : <span class="text-muted">'.$data['court'].'</span> </th>
+														</tr>
+														<tr class="container">
+															<th> SLOT DATE : <span class="text-muted">'.$data['date'].'</span> </th>
+														</tr>
+														<tr class="container">
+															<th> TIMINMG : <span class="text-muted">'.$timing.'</span> </th>
+														</tr>
+													</table>';										
 							  
-								           $template .='<div class="container">
-								            <div class="div-left" style="width:300px;">
-								              Booking ID : <br>
-								              <span class="text-muted"> #'.$data['appoint_id'].'</span> <br><br>';
-											     if ($data['payment_method'] !== '') {
-								              $template .='Amount: <br>
-								              <span class="text-muted">₹'.round($amount, 2).'</span> <br><br>';
-											   }
-								               $template .='Area: <br>
-								              <span class="text-muted">'.$data['court'].'</span>
-								            </div>
-
-								            <div class="div-left">
-								              Booking Date: <br>
-								              <span class="text-muted">'.$data['date'].'</span> <br><br>';
-								              if ($data['payment_method'] !== '') {
-											  $template .='Paymode: <br>
-								              <span class="text-muted">'.$data['payment_method'].'</span> <br><br>';
-											  }
-
-								              $template .='Timing: <br>
-								              <span class="text-muted">'.$timing.'</span>
-								            </div>
-								          </div>
-
-								          <p> Track all your booking details easily through your <a href="https://winkin.in">Winkin My Bookings page</a>.</p>
+								        $template .='<p> Track all your booking details easily through your <a href="https://winkin.in">Winkin My Bookings page</a>.</p>
+										  			<p> PFA(Please Find Attachment).</p>
 
 								          <div class="container">
 								            <p class="text-center">
@@ -942,7 +931,7 @@ use Razorpay\Api\Api;
 	}
 
 	// Client Ip Address
-	if(!function_exists('getClientIp')){
+	if(!function_exists('getClientIp')) {
 	    function getClientIp() {
 	        $ip = '';
 	        if (array_key_exists('HTTP_CLIENT_IP', $_SERVER)) {
@@ -952,8 +941,21 @@ use Razorpay\Api\Api;
 	        } elseif (array_key_exists('REMOTE_ADDR', $_SERVER)) {
 	            $ip = $_SERVER['REMOTE_ADDR'];
 	        }
-
 	        return $ip;
+	    }
+	}
+
+	// Align time order asc
+	if(!function_exists('ArrayTimeAlign')) {
+	    function ArrayTimeAlign($arrayValue) {
+	        usort($arrayValue, function($a, $b) {
+				// Convert time string to 24-hour format and compare
+				$timeA = DateTime::createFromFormat('h:i A', $a[3])->format('H:i');
+				$timeB = DateTime::createFromFormat('h:i A', $b[3])->format('H:i');
+				
+				return strcmp($timeA, $timeB);
+			});
+	        return $arrayValue;
 	    }
 	}
 

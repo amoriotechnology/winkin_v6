@@ -217,24 +217,22 @@ if(!empty($edit_appoint)) {
                                                                     <div class="col-xl-6">
                                                                         <p class="fw-medium text-muted mb-1">Date Issued :
                                                                             <?= !empty($app_date) ? showDate($app_date) : date('M d/Y'); ?> - <span class="text-muted fs-12"> <?= !empty($app_time) ? $app_time : date('h:i a'); ?></span>
-                                                                        </p>
-                                                                    
+                                                                        </p>                                                                    
                                                                         <div class="table-responsive">
                                                                             <table class="table nowrap text-nowrap border mt-4">
                                                                                 <thead class="table-dark">
                                                                                     <tr class="text-center">
-                                                                                        <th>Area</th>
-                                                                                        <th>Duration</th>
-                                                                                        <th>Timing(s)</th>
-                                                                                        <th>Rate</th>
+                                                                                        <th>COURT</th>
+                                                                                        <th>DURATION</th>
+                                                                                        <th>TIMING</th>
+                                                                                        <th>AMOUNT (₹)</th>
                                                                                     </tr>
                                                                                 </thead>
                                                                                 <tbody id="billbody"></tbody>
                                                                                 <tfoot id="billfoot"></tfoot>
                                                                             </table>
                                                                         </div>
-                                                                    </div>                                                                    
-
+                                                                    </div>
                                                                     </div>
                                                                 </div>
 
@@ -310,10 +308,10 @@ if(!empty($edit_appoint)) {
                     <tr> <th> <td></td> </th> </tr>
 
                     <tr class="table-info text-center">
-                        <th class="text-uppercase">Court Area</th>
-                        <th class="text-uppercase">Duration</th>
-                        <th class="text-uppercase">Timing(S)</th>
-                        <th class="text-uppercase">Rate(₹)</th>
+                        <th class="text-uppercase">COURT</th>
+                        <th class="text-uppercase">DURATION</th>
+                        <th class="text-uppercase">TIMING</th>
+                        <th class="text-uppercase">AMOUNT (₹)</th>
                     </tr>
                     <tbody id="payservbody"></tbody>
                     <tfoot id="payservfoot"></tfoot>
@@ -395,14 +393,14 @@ function PaymentData(appid) {
                         var total =  (parseFloat(subtotal+gst)).toFixed(2);
                   var tfoot = '<tr class="table-info text-center"> ' +
                     
-                        '<td colspan="3" align="right"> <b>Sub TOTAL: </b></td> ' +
+                        '<td colspan="3" align="right"> <b>SUBTOTAL: </b></td> ' +
                         '<td><b>' + rate.toFixed(2) + '</b> </td> </tr>' +
                        '<tr class="table-info text-center"> ' +
-                            '<td colspan="3" align="right"> <b>GST (18%) : </b></td> ' +
+                            '<td colspan="3" align="right"> <b>GST AMOUNT (18%) : </b></td> ' +
                             '<td> <b>' + gst + '</b> </td>' + 
                             '</tr>' + 
-                                                     '<tr class="table-info text-center"> ' +
-                                '<td colspan="3" align="right"> <b>Total : </b></td> ' +
+                            '<tr class="table-info text-center"> ' +
+                                '<td colspan="3" align="right"> <b>TOTAL : </b></td> ' +
                                 '<td> <b>' + (parseFloat(subtotal) + parseFloat(gst)).toFixed(2) + '</b> </td>' + 
                             '</tr>' +
 
@@ -872,15 +870,15 @@ function getCourtTable(court_data) {
         var grandTotal = courttotal;
 
         tblfoot += "<tr class='showCoupon d-none'>"+
-                        "<td colspan='3' align='right'> <b>Coupon Percent % :</b> </td>"+
+                        "<td colspan='3' align='right'> <b>COUPON PERCENT % :</b> </td>"+
                         "<td align='center' id='coupon_Percent'></td> </tr>"+
                     " <tr class='showCoupon d-none'>"+
-                        "<td colspan='3' align='right'> <b>Coupon Amount :</b> </td>"+
+                        "<td colspan='3' align='right'> <b>COUPON AMOUNT :</b> </td>"+
                         "<td align='center' id='coupon_Amount'></td> </tr>"+
                     " <tr>"+
-                        "<td colspan='3' align='right'> <b>Subtotal :</b> </td>"+
+                        "<td colspan='3' align='right'> <b>SUBTOTAL :</b> </td>"+
                         "<td align='center'><span id='sub_Amount'> ₹"+courttotal+"</span></td> </tr>"+
-                    "<tr> <td colspan='3' align='right'> <b>Total :</b> <br> <small>(Including GST)</small> </td>"+
+                    "<tr> <td colspan='3' align='right'> <b>TOTAL :</b> <br> <small>(Including GST)</small> </td>"+
                         "<td align='center'> <span id='total_Amount'> ₹"+grandTotal+"</span>"+
                         "<input type='hidden' id='tot_amt' value='"+grandTotal+"' >"+
                         "<input type='hidden' id='getAmount' name='getAmount' value='"+storeGstAmount+"' >"+

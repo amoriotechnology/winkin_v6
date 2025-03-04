@@ -128,7 +128,7 @@ class Frontend extends CI_Controller {
        (SELECT SUM(P.fld_ppaid) FROM payments P WHERE P.fld_appid = A.fld_aid) AS paid,
        (SELECT P.fld_pbalance FROM payments P WHERE P.fld_appid = A.fld_aid ORDER BY P.fld_pdate DESC LIMIT 1) AS balance";
 
-    $items = $this->Common_model->getBookings( $table1, $table2, $table3, $table1cond, $table2cond, $select, $orderField . ' ' . $orderDirection, $limit, $start, $search, ['fld_acustid' => $info['cust_id']] );
+    $items = $this->Common_model->getBookings( $table1, $table2, $table3, $table1cond, $table2cond, $select, $orderField . ' ' . $orderDirection, $limit, $start, $search, ['fld_acustid' => $info['cust_id'], 'fld_atype IS NULL' => NULL] );
 
     $data           = [];
     $i              = $start + 1;
@@ -252,7 +252,6 @@ class Frontend extends CI_Controller {
 
     /* ----- For get booked time of the selected date ----- */
     $appoint_times = $this->Common_model->GetJoinDatas("appointments A", "appointment_meta AM", "`A`.`fld_aid`=`AM`.`fld_amappid`", "`fld_appointid`, `fld_adate`, `fld_amserv_name`, `fld_amstaff_time`, `fld_aduring`, `fld_amserv_dura`, `fld_atype`", "`fld_amserv_name` IN ('".$court."') AND `fld_adate` = '".$date."' AND `fld_astatus` != 'Cancelled'" );
-
     $book_time = $this->Common_model->GetJoinDatas("appointments A", "appointment_meta AM", "`A`.`fld_aid`=`AM`.`fld_amappid`", "`fld_adate`, `fld_amserv_name`, `fld_amstaff_time`, `fld_aduring`, `fld_amserv_dura`", "`fld_amserv_name` IN ('".$court."') AND `fld_adate` = '".$date."' AND `fld_aid` = '".$appkey."' AND `fld_astatus` != 'Cancelled'" );
 
     $booked_time = [];
@@ -369,7 +368,7 @@ class Frontend extends CI_Controller {
                               if($blockid == "Maintenance") {
                                 $response .= '<span class="text-dark">'.$blockid.'</span></small>';
                               } else {
-                                $response .= '<span class="text-white">'.$blockid.'</span></small>';
+                                $response .= '<span class="text-white"></span></small>';
                               }
                               
                     if (!$isDisabled) {

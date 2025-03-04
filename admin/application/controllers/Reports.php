@@ -135,9 +135,7 @@ class Reports extends CI_Controller {
 		}
 
 		$where = array_merge($where, $dateWhere);
-
         $total = $this->Common_model->GetJoinDatas('appointments A', 'customers C', '`A`.`fld_acustid` = `C`.`fld_id`', '*', $where);
-
         $totalItems = count($total);
 
         $table1     = 'appointments A';
@@ -160,16 +158,16 @@ class Reports extends CI_Controller {
 		                    <i class="ti ti-dots-vertical"></i>
 		                </button>
 		                <ul class="dropdown-menu">';
-                           if ($item['fld_abalance'] > 0 &&  $item['fld_astatus'] != "Pending") {
-		                     $action .= ' <li> <a class="dropdown-item" href="' . base_url('pdf_generate/' . $item['fld_appointid']) . '" target="_blank" role="button">Bill</a> </li>';
+            if ((float)$item['fld_abalance'] == 0) {
+                $action .= ' <li> <a class="dropdown-item" href="' . base_url('pdf_generate/' . $item['fld_appointid']) . '" target="_blank" role="button">Bill View</a> </li>';
             }
-                             if ($item['fld_astatus'] != "Pending") {
-                $action .= '<li>
-		                        <a class="dropdown-item" onclick="PaymentData(\'' . md5($item['fld_appointid']) . '\', \'appointment\')" data-bs-toggle="modal" href="#PaymentModal" role="button">Payment</a>
-		                    </li>';
+
+            if ((float)$item['fld_abalance'] > 0 && $item['fld_apaymode'] == 'Cash' && $item['fld_astatus'] != "Cancelled") {
+                $action .= '<li> <a class="dropdown-item" onclick="PaymentData(\'' . md5($item['fld_appointid']) . '\', \'appointment\')" data-bs-toggle="modal" href="#PaymentModal" role="button">Payment</a> </li>';
             }
+
             // Conditional logic for the "Reschedule" button
-          if (strtotime(CURDATE) <= strtotime($item['fld_adate']) && ($item['fld_astatus'] == "Confirm"  ||  $item['fld_astatus'] == "Confirmed")) {
+            if (strtotime(CURDATE) <= strtotime($item['fld_adate']) && ($item['fld_astatus'] == "Confirm"  ||  $item['fld_astatus'] == "Confirmed")) {
                 $action .= '<li><a class="dropdown-item" href="' . base_url('viewcourt_status/' . md5($item['fld_appointid'])) . '">Reschedule</a></li>';
             }
 
@@ -182,10 +180,9 @@ class Reports extends CI_Controller {
             }
 
             if (strtotime(CURDATE) <= strtotime($item['fld_adate']) && ($item['fld_astatus'] == "Confirm"  ||  $item['fld_astatus'] == "Confirmed")) {
-                $action .= '<li> <a class="dropdown-item cancel-confirm" data-id="' . md5($item['fld_aid']) . '">Cancel</a> </li>';
+                // $action .= '<li> <a class="dropdown-item cancel-confirm" data-id="' . md5($item['fld_aid']) . '">Cancel</a> </li>';
             }
             if ($item['fld_astatus'] == "Pending") {
-              
                 $action .= '<li> <a class="dropdown-item release_confirm" data-id="' . md5($item['fld_appointid']). '" data-status="admin_update">Confirm</a> </li>';
 				$action .= '<li> <a class="dropdown-item release_confirm" data-id="' . md5($item['fld_appointid']) . '" data-status="Release">Release</a></li>';
             }
