@@ -323,7 +323,7 @@
                             var courtname = 'Court B';
                             if(value[0] == 'courtA') { courtname = 'Court A'; }
 
-                            tbody += '<tr class="text-center"> <td>' + courtname + '</td> <td>' + value[1] + '</td> <td>' + starttime+' - '+ endtime + '</td> <td>' + (value[2] / 1.18).toFixed(2)  + '</td> </tr>';
+                            tbody += '<tr class="text-center"> <td>' + courtname + '</td> <td>' + value[1] + ' mins</td> <td>' + starttime + ' - ' + endtime + '</td> <td>' + (value[2] / 1.18).toFixed(2) + '</td> </tr>';
                             rate += parseFloat((value[2] / 1.18).toFixed(2));
                         }
                           var subtotal = rate.toFixed(2);

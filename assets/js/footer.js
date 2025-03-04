@@ -100,9 +100,14 @@ function MinutesToHour(minutes) {
 }
 
 function DisplayTime(time, duration) {
-    var d = new Date('2000-01-01 '+time);
-    d.setMinutes(d.getMinutes()+duration);
-    var timestru = d.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+    var d = new Date('2000-01-01 ' + time);
+    d.setMinutes(d.getMinutes() + duration);
+    
+    var hours = d.getHours() % 12 || 12; 
+    var minutes = d.getMinutes().toString().padStart(2, '0'); 
+    var period = d.getHours() >= 12 ? 'PM' : 'AM'; 
+
+    var timestru = hours.toString().padStart(2, '0') + ':' + minutes + ' ' + period;
     return timestru;
 }
 
