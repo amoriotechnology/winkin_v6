@@ -20,7 +20,6 @@
                                 <div class="col-xl-5 col-md-12 col-sm-12">
                                     <div class="input-group">
                                         <input type="text" name="datefilter" id="datefilter" class="form-control datefilter" placeholder="Search date">
-                                        <button type="button" id="search" class="btn btn-primary">Search</button>&nbsp;
                                         <a href="<?= base_url('revenue') ?>" id="search" class="btn btn-primary">Refresh</a>
                                     </div>
                                 </div>
@@ -292,12 +291,11 @@ $(document).ready(function() {
 
             $(api.column(8).footer()).html(totalAmount.toFixed(2));
             $(api.column(9).footer()).html(totalGST.toFixed(2));
-         //   $(api.column(9).footer()).html(totalDiscount.toFixed(2));
             $(api.column(10).footer()).html(totalTotal.toFixed(2));
         }
     });
 
-    $('#search').on('click', function() {
+    $('#datefilter').on('change', function() {
         revenueReport.draw();
     });
 

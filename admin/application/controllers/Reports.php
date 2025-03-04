@@ -499,7 +499,6 @@ class Reports extends CI_Controller {
         $search         = $this->input->post('search', TRUE)['value'];
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
-        $datefilter     = $this->input->post('datefilter', TRUE);
         $searchColumns = $this->input->post('search_columns', TRUE); 
         $where = [];
 	    if (!empty($searchColumns)) {
@@ -532,26 +531,10 @@ class Reports extends CI_Controller {
 		}
 
 
-		$dateWhere = [];
-		if (!empty($datefilter)) {
-		    $split = explode(" to ", $datefilter);
-	        $startfilter = struDate($split[0]);
-	        $endfilter = struDate($split[1]);
-	        $startfilter = $startfilter . " 00:00:00";
-            $endfilter =  $endfilter . " 23:59:59"; 
-
-		    $dateWhere = [
-		        'fld_created_date >=' => $startfilter,
-		        'fld_created_date <=' => $endfilter
-		    ];
-		}
-
-		$col_where = array_merge($where, $dateWhere);
-
         $searchdata = ['fld_custid' => $search, 'fld_name' => $search, 'fld_phone' => $search, 'fld_email' => $search,"DATE_FORMAT(`fld_dob`, '%Y-%m-%d')" => $search, "DATE_FORMAT(`fld_created_date`, '%Y-%m-%d')" => $search];
 
-        $totalItems = $this->Common_model->getCount('customers', "", $searchdata, "`fld_id`", $col_where);
-        $items      = $this->Common_model->PaginationData('customers', "*", "", "`$orderField` $orderDirection", 10, $start, $searchdata, $col_where);
+        $totalItems = $this->Common_model->getCount('customers', "", $searchdata, "`fld_id`", $where);
+        $items      = $this->Common_model->PaginationData('customers', "*", "", "`$orderField` $orderDirection", $limit, $start, $searchdata, $where);
 
         $noofbook = $this->Common_model->GetDatas('appointments', "`fld_acustid`, COUNT(`fld_acustid`) as noofbook", ["fld_acustid !=" => ''], "", "fld_acustid");
 
@@ -681,7 +664,7 @@ class Reports extends CI_Controller {
 
         $searchdata = ['fld_cpname' => $search, 'fld_cp_expdate' => $search, 'fld_cp_percentage' => $search];
         $totalItems = $this->Common_model->getCount('coupons', ["fld_cpflag" => 1], $searchdata);
-        $items      = $this->Common_model->PaginationData('coupons', "*", ["fld_cpflag" => 1], "`$orderField` $orderDirection", 10, $start, $searchdata);
+        $items      = $this->Common_model->PaginationData('coupons', "*", ["fld_cpflag" => 1], "`$orderField` $orderDirection", $limit, $start, $searchdata);
         $data       = [];
         $i          = $start + 1;
 
@@ -804,7 +787,7 @@ class Reports extends CI_Controller {
 
         $totalItems = $this->Common_model->getCount('appointments', ["fld_atype" => 'Maintenance'], $searchdata, '`fld_aid`', $col_where);
 
-        $items = $this->Common_model->PaginationData('appointments', "*", ["fld_atype" => 'Maintenance'], "`$orderField` $orderDirection", 10, $start, $searchdata, $col_where);
+        $items = $this->Common_model->PaginationData('appointments', "*", ["fld_atype" => 'Maintenance'], "`$orderField` $orderDirection", $limit, $start, $searchdata, $col_where);
 
 
         $data = [];
@@ -879,7 +862,7 @@ class Reports extends CI_Controller {
         $searchdata = ['fld_scate' => $search, 'fld_sname' => $search, 'fld_sduration' => $search, 'fld_srate' => $search, 'fld_stype' => $search, 'fld_sdesc' => $search, 'fld_sstatus' => $search];
 
         $totalItems = $this->Common_model->getCount('services', "", $searchdata);
-        $items      = $this->Common_model->PaginationData('services', "*", '', "`$orderField` $orderDirection", 10, $start, $searchdata);
+        $items      = $this->Common_model->PaginationData('services', "*", '', "`$orderField` $orderDirection", $limit, $start, $searchdata);
         $data       = [];
         $i          = $start + 1;
 
@@ -953,7 +936,6 @@ class Reports extends CI_Controller {
         $search         = $this->input->post('search', TRUE)['value'];
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
-        $datefilter     = $this->input->post('datefilter', TRUE);
 
         $searchColumns = $this->input->post('search_columns', TRUE); 
 
@@ -988,27 +970,10 @@ class Reports extends CI_Controller {
 		    }
 		}
 
-		$dateWhere = [];
-		if (!empty($datefilter)) {
-		    $split = explode(" to ", $datefilter);
-	        $startfilter = struDate($split[0]);
-	        $endfilter = struDate($split[1]);
-	        $startfilter = $startfilter . " 00:00:00";
-            $endfilter =  $endfilter . " 23:59:59"; 
-
-		    $dateWhere = [
-		        'fld_ucreated_date >=' => $startfilter,
-		        'fld_ucreated_date <=' => $endfilter
-		    ];
-		}
-
-		$col_where = array_merge($where, $dateWhere);
-
-
         $searchdata = [ 'fld_uname' => $search, 'fld_staffid' => $search, 'fld_uphone' => $search, 'fld_uemail' => $search, 'fld_ustatus' => $search, 'fld_access' => $search, "DATE_FORMAT(`fld_udob`, '%d/%m/%Y')" => $search ];
 
-        $totalItems = $this->Common_model->getCount('users', ['fld_uroles' => 2], $searchdata, "`fld_uid`", $col_where);
-        $items      = $this->Common_model->PaginationData('users', "*", ['fld_uroles' => 2], "`$orderField` $orderDirection", 10, $start, $searchdata, $col_where);
+        $totalItems = $this->Common_model->getCount('users', ['fld_uroles' => 2], $searchdata, "`fld_uid`", $where);
+        $items      = $this->Common_model->PaginationData('users', "*", ['fld_uroles' => 2], "`$orderField` $orderDirection", $limit, $start, $searchdata, $where);
         $data       = [];
         $i          = $start + 1;
 
@@ -1096,7 +1061,7 @@ class Reports extends CI_Controller {
             $where = ['fld_lstatus !=' => 'Deleted', 'fld_lstaff_id' => checkLogin()['uid']];
         }
         $totalItems = $this->Common_model->getCount('leaves', $where, $searchdata);
-        $items      = $this->Common_model->PaginationData('leaves', "*", $where, "`$orderField` $orderDirection", 10, $start, $searchdata);
+        $items      = $this->Common_model->PaginationData('leaves', "*", $where, "`$orderField` $orderDirection", $limit, $start, $searchdata);
         $data       = [];
         $i          = $start + 1;
 

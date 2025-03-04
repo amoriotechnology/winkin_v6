@@ -21,15 +21,6 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <div class="row d-flex justify-content-end">
-                                <div class="col-xl-4 col-md-12 col-sm-12">
-                                    <div class="input-group">
-                                        <input type="text" name="datefilter" id="datefilter" class="form-control datefilter" placeholder="Search date">
-                                        <button type="button" id="search" class="btn btn-primary">Search</button>&nbsp;
-                                        <a href="<?= base_url('staff') ?>" id="search" class="btn btn-primary">Refresh</a>
-                                    </div>
-                                </div>
-                            </div>
                             <table id="staff_list" class="table table-bordered table-hover text-nowrap w-100">
                                 <thead class="table-dark">
                                     <tr class="filter-row">
@@ -83,7 +74,7 @@
         }
         
         var table = $('#staff_list').DataTable({
-            responsive: !0,
+            responsive: 0,
             "processing": true,
             "serverSide": true,
             "lengthMenu":[[10,25,50,100],[10,25,50,100]],
@@ -92,7 +83,6 @@
                 "type": "POST",
                "data": function(d) {
                   d['<?= $this->security->get_csrf_token_name(); ?>'] = '<?= $this->security->get_csrf_hash(); ?>';
-                  d['datefilter'] = $('#datefilter').val();
                     $('#staff_list .column-search').each(function() {
                         var columnIndex = $(this).parent().index();
                         if (this.value) {
@@ -243,10 +233,6 @@
                     "exportOptions": { "columns": ':visible' }
                 },
             ]
-        });
-
-        $('#search').on('click', function() {
-            table.draw();
         });
 
         $('#staff_list thead').on('keyup change', '.column-search', function() {
