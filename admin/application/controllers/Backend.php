@@ -602,6 +602,20 @@ class Backend extends CI_Controller {
 
 		$history = $paymode;
 		if (!empty($appid)) {
+
+			/* Check already have the slot, date, time */
+			$bookedtime = '';
+			for($b = 0; $b < count($timings); $b++) {
+			  $bookedtime .= "'".$timings[$b]."', ";
+			}
+	  
+			$prev_booking = $this->Common_model->GetJoinDatas('appointments A', 'appointment_meta AM', 'A.fld_aid = AM.fld_amappid', "`fld_adate`", "`fld_amstaff_time` IN ('".trim($bookedtime, ", '")."') AND `fld_adate` = '".$court_date."' AND `fld_aserv` = '".$admincourt."' AND `fld_astatus` != 'Cancelled'");
+			if(!empty($prev_booking)) {
+			  echo json_encode(['status' => 300, 'alert_msg' => 'Sorry, but this slot is already booked!']);
+			  exit;
+			}
+			
+			$appoint_id = $this->input->post('appoint_id');
 			
             $check = ExistorNot('customers', ['fld_phone' => $custphone]);
 			$cust_rec = $this->Common_model->GetDatas('customers', 'fld_id, fld_custid', ['fld_id !=' => ''], "`fld_id` DESC");
@@ -615,12 +629,6 @@ class Backend extends CI_Controller {
 				'fld_name' => $custname,
 				'fld_lastname' => $custlname,
 				'fld_email' => $custemail,
-				'fld_gender' => $custgender,
-				'fld_dob' => struDate($custdob),
-				'fld_maritial_sts' => $mari_sts,
-				'fld_anniversary' => struDate($anni_date),
-				'fld_address' => $custaddr,
-				'fld_notes' => $custpref,
 			], ["fld_phone" => $custphone]);
 
 			$CustID = $this->input->post('cust_id', TRUE);
@@ -674,10 +682,10 @@ class Backend extends CI_Controller {
 			$name = (!empty($check)) ? $check[0]['fld_name'] : $custname;
             $subject = ':tada: Your Booking Has Been Rescheduled! :tada:';
             $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $this->input->post('appoint_id'), 'court' => $admincourt, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => '', 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
-            $getPdf = $this->pdf_generate($this->input->post('appoint_id'));
+            
+			$getPdf = $this->pdf_generate($this->input->post('appoint_id'));
 			$mail = SendEmail($tomail, "", "", $subject, $bookingtemplates, $getPdf);
 			$this->Common_model->UpdateData('appointments', ['fld_conf_email' => $mail], ['fld_aid' => $appid]);
-		
 		    
 		} else {
 
@@ -753,7 +761,6 @@ class Backend extends CI_Controller {
 			$app_lastid  = $this->Common_model->InsertData('appointments', $new_app_data);
 
 			for($a = 0; $a < count($timings); $a++) {
-				
 				/* --- For Appointment Meta --- */
 				$new_meta_data[$a] = [
 					'fld_amappid ' => $app_lastid,
@@ -795,7 +802,7 @@ class Backend extends CI_Controller {
 		if(!empty($paydata)) {
 			if($razorstatus == "created" || $razorstatus == "authorized" || $razorstatus == "pending") {
 				$paystatus = $status = "Pending";
-			} elseif($razorstatus == "failed" || $razorstatus == "cancelled") {
+			} elseif($razorstatus == "Failed" || $razorstatus == "failed" || $razorstatus == "cancelled") {
 				$paystatus = $status = "Cancelled";
 			} elseif($razorstatus == "refunded") {
 				$paystatus = $status = "Refunded";
@@ -1034,7 +1041,6 @@ class Backend extends CI_Controller {
       }
     }
 
-
     $cur_time = strtotime(date('H:i', strtotime('+0 minutes'))); 
     $cur_date = date('Y-m-d');
 
@@ -1142,7 +1148,7 @@ class Backend extends CI_Controller {
                               	$response .= '</small>';
                               }
                               
-                    if (!$isDisabled || ($resch_bool == true)) {
+                    if (!$isDisabled) {
                         $response .= '<input type="checkbox" name="times[]" class="d-none form-check-input rounded-circle form-checked-success" '.($isChecked ? 'checked' : '').' value="'.showTime($looptime).'" >';
                     }
 

@@ -67,14 +67,14 @@ $appkey = 0;
 $appservs = $app_coup_name = "";
 $app_date = CURDATE;
 $app_time = [];
-
+$gettimingcount = 0;
 $weeks = !empty($setting_data[0]['fld_weekdays']) ? json_decode($setting_data[0]['fld_weekdays']) : [];
-
 
 if(!empty($edit_appoint)) {
     $appkey = array_keys($edit_appoint)[0];
     $appservs = $edit_appoint[$appkey]['app_serv'];
     $app_time = $edit_appoint[$appkey]['app_time'];
+    $gettimingcount = count(explode(",",$app_time));
     $app_date = $edit_appoint[$appkey]['app_date'];
     $app_coup_name = $edit_appoint[$appkey]['coup_name'];
 } 
@@ -189,6 +189,7 @@ if(!empty($edit_appoint)) {
                                                   <ul class="calendar-days"></ul>
                                                 </div>
                                                 <input type="hidden" name="court_date" id="court_date" value="<?= $app_date; ?>">
+                                                <input type="hidden" name="existing_slot" id="existing_slot" value="<?= $gettimingcount; ?>">
                                             </div>
 
                                             <div class="col-xl-6">
@@ -410,19 +411,20 @@ $(document).ready(function() {
         var next_input = $('.'+next_td).children().children().children().children();
         var next_input = next_input[1];
         var cont_td = $(prev_input).prop('checked');
-        var duration = 0;
-        var rate = 0;
+        
         if ($(input).prop('checked')) {
             $(input).prop('checked', false);
         } else {
             $(input).prop('checked', true);
         }
         var ctiming = [];
+        var duration = 0; var rate = 0;
         $("input[name='times[]']:checked").each(function() {
             ctiming.push($(this).val());
             duration += 30;
             rate += 600;
         });
+
         clickcount++;
         if(ctiming == "") { clickcount = 0; }
         if(ctiming.length == 1) { clickcount = 0; }
@@ -441,14 +443,7 @@ $(document).ready(function() {
         if($(prev_input).is(':checked') && $(next_input).is(':checked')) {
             $(input).prop('checked', true);
         }
-        if (existingSlotCount > 0 && ctiming.length > existingSlotCount) {
-            $('.choose-time-error-msg').focus();
-            $('.choose-time-error-msg').html('<div class="alert alert-danger alert-dismissible fade show"> <b>You cannot add more slots (booked hours) than previously booked hours.</b> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i class="bi bi-x"></i></button> </div>');
-            $(input).prop('checked', false);
-            $("input[name='times[]']:checked").each(function() {
-                ctiming.push($(this).val());
-            });
-        }
+
         getCourtTable(ctiming);
         $("#book_date_show").html(displayDate(new Date()));
         var element = $("input[name='times[]']").parent().parent().parent().parent();

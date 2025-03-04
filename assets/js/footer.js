@@ -116,7 +116,7 @@ function MinutesToHour(minutes) {
 function DisplayTime(time, duration) {
     var d = new Date('2000-01-01 '+time);
     d.setMinutes(d.getMinutes()+duration);
-    var timestru = d.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+    var timestru = d.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
     return timestru;
 }
 
