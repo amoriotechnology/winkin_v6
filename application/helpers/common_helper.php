@@ -42,7 +42,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('GetCustDetails')) { /* init GetCustDetails */
 		function GetCustDetails($id) {
 			getInstance()->load->model('Common_model');
@@ -57,15 +56,13 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('checkCustLogin')) { /* login check if not login redirect to login */
 		function checkCustLogin() {
 			getInstance()->load->library('session');
 			$custdata = getInstance()->session->userdata('login_cust_info');
-			return $custdata = (empty($custdata)) ? [] : $custdata;
+			return $custdata = (empty($custdata['cust_phone'])) ? [] : $custdata;
 		}
 	}
-
 
 	if (!function_exists('ImageUpload')) {
 	    function ImageUpload($imagename, $path, $width = "", $height = "") {
@@ -90,7 +87,6 @@ use Razorpay\Api\Api;
 	    }
 	}
 
-
 	if(!function_exists('showDate')) { /* format date for frontend view */
 		function showDate($date) {
 			$length = strlen($date);
@@ -104,7 +100,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('showTime')) { /* format date for frontend view */
 		function showTime($time) {
 			
@@ -116,7 +111,6 @@ use Razorpay\Api\Api;
 			return $showtime;
 		}
 	}
-
 
 	if(!function_exists('TimeDuration')) { /* duration calculation */
 		function TimeDuration($times, $duration) {
@@ -131,7 +125,6 @@ use Razorpay\Api\Api;
 			return $timedura;	
 		}
 	}
-
 
 	if(!function_exists('struDate')) { /* format date for db store */
 		function struDate($date) {
@@ -148,7 +141,6 @@ use Razorpay\Api\Api;
 			return $strudate;	
 		}
 	}
-
 
 	if(!function_exists('alertMsg')) { /* return alert msg color & sentence */
 		function alertMsg($name) {
@@ -176,7 +168,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('mintoHour')) { /* convert minutes to hour(s) */
 		function mintoHour($mins) {
 			$conv = ((float)$mins / 60);
@@ -191,7 +182,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('DateDiff')) { /* return days count of btw dates */
 		function DateDiff($date1, $date2) {
 			$start = struDate($date1);
@@ -201,7 +191,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('ExistorNot')) { /* return existing value */
 		function ExistorNot($table, $where) {
 			getInstance()->load->model('Common_model');
@@ -210,13 +199,11 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('AgeCal')) { /* return year diff count */
 		function AgeCal($dob) {
 			return ((int)date('Y') - (int)date('Y', strtotime($dob)));
 		}
 	}
-
 
 	if(!function_exists('pageConfig')) { /* return page config */
 		function pageConfig($url, $table, $where = NULL) {
@@ -246,7 +233,6 @@ use Razorpay\Api\Api;
 			return $pageconfig;
 		}
 	}
-
 
 	if(!function_exists('mergeCustAppointment')) { /* merge appointment based on appointment ID */
 		function mergeCustAppointment($records) {
@@ -307,7 +293,6 @@ use Razorpay\Api\Api;
 			return $appoint_rec;
 		}
 	}
-
 
 	if(!function_exists('GetWishes')) { /* get today bday and anniversary detail */
 		function GetWishes() {
@@ -395,18 +380,18 @@ use Razorpay\Api\Api;
 								                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">';
 									                    if(isset($data['content'])) {
 									                    	$template .= '<tr>
-											                            <td style="font-family:Poppins,Arial,sans-serif; font-size:14px; mso-line-height-rule: exactly;line-height: 1.5;padding-bottom:30px;color:#000000;text-align:center">
-											                              <p>'.$data['content'].'</p>
-											                            </td>
-											                          </tr>';
+																			<td style="font-family:Poppins,Arial,sans-serif; font-size:14px; mso-line-height-rule: exactly;line-height: 1.5;padding-bottom:30px;color:#000000;text-align:center">
+																			<p>'.$data['content'].'</p>
+																			</td>
+																		</tr>';
 									                    }
 									                    if(isset($data['wish_msg'])) {
 									                    	$template .= '<tr>
-                                                                <td style="font-family:Poppins,Arial,sans-serif; font-size:20px; text-align:center">
-                                                                  <p style="margin:0; color:#fff; font-weight:600">
+                                                                <td style="font-family:Poppins,Arial,sans-serif; font-size:20px; text-align:center; background-color: #fff;">
+                                                                  <p style="margin:0; color:#000; font-weight:600">
                                                                     Your OTP for password reset is: <strong>'.$data['wish_msg'].'</strong>
                                                                   </p>
-                                                                  <p style="margin:10px 0; color:#fff; font-size:16px;">
+                                                                  <p style="margin:10px 0; color:#000; font-size:16px;">
                                                                     Please use this One-Time Password (OTP) to reset your password. 
                                                                     Do not share this code with anyone for security reasons.
                                                                   </p>
@@ -430,7 +415,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('EmailConfig')) { /* get today bday and anniversary detail */
 		function EmailConfig() {
 			$settings = getSettingData();
@@ -448,7 +432,6 @@ use Razorpay\Api\Api;
 			return $emailconfig;
 		}
 	}
-
 
 	if(!function_exists('SendEmail')) { /* get today bday and anniversary detail */
 		function SendEmail($to, $cc, $bcc, $subj, $msg, $attachment = NULL) {
@@ -653,7 +636,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('Bgcolors')) { /* get today bday and anniversary detail */
 		function Bgcolors($type) {
 			
@@ -721,7 +703,6 @@ use Razorpay\Api\Api;
 
 	//	 $rate = isset($data['amount']) ? (float)$data['amount'] : 0;
 	//	 $rate = isset($data['amount']) ? round((float)$data['amount'], 2) : 0;
-
 			$rate = 1;
 			$gst = isset($data['gst']) ? (float)$data['gst'] : 0;
 			$paycharge = isset($data['pay_charge']) ? (float)$data['pay_charge'] : 0;
@@ -817,6 +798,19 @@ use Razorpay\Api\Api;
 		}
 	}
 
+	// Align time order asc
+	if(!function_exists('ArrayTimeAlign')) {
+	    function ArrayTimeAlign($arrayValue) {
+	        usort($arrayValue, function($a, $b) {
+				// Convert time string to 24-hour format and compare
+				$timeA = DateTime::createFromFormat('h:i A', $a[3])->format('H:i');
+				$timeB = DateTime::createFromFormat('h:i A', $b[3])->format('H:i');
+				
+				return strcmp($timeA, $timeB);
+			});
+	        return $arrayValue;
+	    }
+	}
 
 
 

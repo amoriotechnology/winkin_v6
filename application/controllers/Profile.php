@@ -108,6 +108,7 @@ class Profile extends CI_Controller {
 
 	public function forget_pwd()
 	{
+		$this->session->unset_userdata('login_cust_info');
 		$data = [
 			'cmpy_info' => getSettingData(),
 		];
@@ -139,17 +140,17 @@ class Profile extends CI_Controller {
 			$email_id = $info['cust_email'];
 		}
 		
-		$template = EmailTemplate(['wish_msg' => $random_no]);
-		SendEmail($email_id, "", "", 'Your 6 Digit OTP Number', $template);
 		if(!empty($email_id)) {
-			$this->Common_model->UpdateData('customers', ['fld_otp' => $random_no, 'fld_otp_date' => CURDATETIME], ['fld_email' => $email_id]);
-			$response = ['status' => 200, 'title' => 'OTP Sent Successfully!!!', 'text' => '6 Digit OTP Number Sent, Please check your email address.', 'icon' => 'success'];
+			$template = EmailTemplate(['wish_msg' => $random_no]);
+			SendEmail($email_id, "", "", 'Your 6 Digit OTP Number', $template);
+			if(!empty($email_id)) {
+				$this->Common_model->UpdateData('customers', ['fld_otp' => $random_no, 'fld_otp_date' => CURDATETIME], ['fld_email' => $email_id]);
+				$response = ['status' => 200, 'title' => 'OTP Sent Successfully!!!', 'text' => '6 Digit OTP Number Sent, Please check your email address.', 'icon' => 'success'];
+			}
 		}
-
 		echo json_encode($response);
 		exit;
 	}
-
 
 	public function validateOTP() {
 
@@ -158,19 +159,14 @@ class Profile extends CI_Controller {
     	}
 
 		$OTP = trim($this->input->post('otp', TRUE));
-		$email_addr = $this->input->post('email_addr', TRUE);
-    	$info = checkCustLogin();
-    	if(empty($info)) {
-			$email = $this->Common_model->GetDatas('customers', 'fld_email', ['fld_email' => $email_addr]);
-			$info['cust_email'] = $email[0]['fld_email'];
-		}
-    	$result = $this->Common_model->GetDatas('customers', "`fld_email`, `fld_pass`, `fld_otp`", ['fld_email' => $info['cust_email'], 'fld_otp' => $OTP]);
+		$email_addr = $this->input->post('email_addr', TRUE);    	
+
+    	$result = $this->Common_model->GetDatas('customers', "`fld_email`, `fld_pass`, `fld_otp`", ['fld_email' => $email_addr, 'fld_otp' => $OTP]);
 
     	$response = (!empty($result)) ? ['status' => 200, 'title' => 'OTP Validated', 'text' => 'OTP Verified Successfully!!!'] : ['status' => 400, 'title' => 'OTP Validated', 'text' => 'Invalid OTP Number'];
     	echo json_encode($response);
     	exit;
 	}
-
 
 	public function change_password() {
 
@@ -190,6 +186,7 @@ class Profile extends CI_Controller {
 		$pass = $this->encryption->encrypt($newpass);
 		$result = $this->Common_model->UpdateData('customers', ['fld_pass' => $pass], ['fld_email' => $info['cust_email']]);
 		$response = ($result > 0) ? ['status' => 200, 'title' => 'OTP Validated', 'text' => 'Matched Successfully!!!'] : ['status' => 400, 'title' => 'OTP Validated', 'text' => 'Invalid OTP Number'];
+		$this->session->unset_userdata('login_cust_info');
 		echo json_encode($response);
     	exit;
 	}

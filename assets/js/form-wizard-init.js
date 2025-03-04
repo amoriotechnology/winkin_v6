@@ -16,7 +16,6 @@
     	defaultDate: false,
     }), 
 
-
     flatpickr(".anniver", {
     	dateFormat:"M d/Y",
     	mode: 'single',
