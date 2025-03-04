@@ -128,7 +128,7 @@ class Frontend extends CI_Controller {
        (SELECT SUM(P.fld_ppaid) FROM payments P WHERE P.fld_appid = A.fld_aid) AS paid,
        (SELECT P.fld_pbalance FROM payments P WHERE P.fld_appid = A.fld_aid ORDER BY P.fld_pdate DESC LIMIT 1) AS balance";
 
-    $items = $this->Common_model->getBookings( $table1, $table2, $table3, $table1cond, $table2cond, $select, $orderField . ' ' . $orderDirection, $limit, $start, $search, ['fld_acustid' => $info['cust_id']] );
+    $items = $this->Common_model->getBookings( $table1, $table2, $table3, $table1cond, $table2cond, $select, $orderField . ' ' . $orderDirection, $limit, $start, $search, ['fld_acustid' => $info['cust_id'], 'fld_atype IS NULL' => NULL] );
 
     $data           = [];
     $i              = $start + 1;
@@ -252,7 +252,6 @@ class Frontend extends CI_Controller {
 
     /* ----- For get booked time of the selected date ----- */
     $appoint_times = $this->Common_model->GetJoinDatas("appointments A", "appointment_meta AM", "`A`.`fld_aid`=`AM`.`fld_amappid`", "`fld_appointid`, `fld_adate`, `fld_amserv_name`, `fld_amstaff_time`, `fld_aduring`, `fld_amserv_dura`, `fld_atype`", "`fld_amserv_name` IN ('".$court."') AND `fld_adate` = '".$date."' AND `fld_astatus` != 'Cancelled'" );
-
     $book_time = $this->Common_model->GetJoinDatas("appointments A", "appointment_meta AM", "`A`.`fld_aid`=`AM`.`fld_amappid`", "`fld_adate`, `fld_amserv_name`, `fld_amstaff_time`, `fld_aduring`, `fld_amserv_dura`", "`fld_amserv_name` IN ('".$court."') AND `fld_adate` = '".$date."' AND `fld_aid` = '".$appkey."' AND `fld_astatus` != 'Cancelled'" );
 
     $booked_time = [];
@@ -369,7 +368,7 @@ class Frontend extends CI_Controller {
                               if($blockid == "Maintenance") {
                                 $response .= '<span class="text-dark">'.$blockid.'</span></small>';
                               } else {
-                                $response .= '<span class="text-white">'.$blockid.'</span></small>';
+                                $response .= '<span class="text-white"></span></small>';
                               }
                               
                     if (!$isDisabled) {
@@ -400,7 +399,6 @@ class Frontend extends CI_Controller {
     echo $response;
     exit;
   }
-
 
   public function add_cust_booking() {
 
@@ -631,7 +629,6 @@ class Frontend extends CI_Controller {
     }
 
     $response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc'), 'appoint_id' => $AppointID] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
-
     echo json_encode($response);
     exit;
   }
@@ -660,7 +657,7 @@ class Frontend extends CI_Controller {
 		}
 
     $result = 0;
-    $app_detail = $this->Common_model->GetJoinDatas('appointments A', 'customers C', 'A.fld_acustid = C.fld_id', '`fld_aid`, `fld_appointid`, `fld_name`, `fld_email`, `fld_phone`, `fld_aserv`, `fld_adate`, `fld_atime`, `fld_arate`, `fld_acpamt`', ['fld_appointid' => $appoint_id]);
+    $app_detail = $this->Common_model->GetJoinDatas('appointments A', 'customers C', 'A.fld_acustid = C.fld_id', '`fld_aid`, `fld_appointid`, `fld_name`, `fld_email`, `fld_phone`, `fld_aserv`, `fld_adate`, `fld_atime`, `fld_arate`, `fld_acpamt`, `fld_apaymode`', ['fld_appointid' => $appoint_id]);
     if(!empty($app_detail)) {
       $balance = ((float)$app_detail[0]['fld_arate'] - (float)$paydata['amount']);
       $this->Common_model->UpdateData('appointments', ['fld_astatus' => $status, 'fld_payment_id' => $payment_id, 'fld_order_id' => $order_id, 'fld_signature' => $signature, 'fld_apaystatus' => $paydata['status'], 'fld_abalance' => $balance], ['fld_appointid' => $appoint_id]);
@@ -678,7 +675,7 @@ class Frontend extends CI_Controller {
       $gst_amount = 0;
       $payment_amount = $app_detail[0]['fld_arate'];
 
-      $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $appoint_id, 'court' => $court, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => $coupon_amount, 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
+      $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $appoint_id, 'payment_method' => $app_detail[0]['fld_apaymode'], 'court' => $court, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => $coupon_amount, 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
 
       $Pdf = $this->pdf_generate($appoint_id);
       $mail = SendEmail($tomail, "", "", $subject, $bookingtemplates, $Pdf);

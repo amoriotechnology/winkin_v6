@@ -23,7 +23,7 @@
 
                         <div class="col-md-6">
                             <label class="form-label fs-14">Date <span class="text-danger">*</span></label>
-                            <input type="text" name="mnt_date" class="form-control daterange" id="mnt_date" value="<?= (isset($edit_maintenance[0]['fld_adate']) ? $edit_maintenance[0]['fld_adate'] : ''); ?>">
+                            <input type="text" name="mnt_date" class="form-control daterange" id="mnt_date" value="<?= (isset($edit_maintenance[0]['fld_adate']) ? showDate($edit_maintenance[0]['fld_adate']) : ''); ?>">
                             <span class="maintaindate-error-msg text-danger"></span>
                         </div>
 
@@ -121,6 +121,7 @@ document.addEventListener("DOMContentLoaded", function() {
         $("#mnt_date").flatpickr({
             dateFormat: "d-m-Y",
             minDate: "today", 
+            maxDate: new Date().fp_incr(30),
             onChange: function(selectedDates, dateStr, instance) {
                 selectedDate = dateStr; 
                 disableSelectedDate();
@@ -131,6 +132,7 @@ document.addEventListener("DOMContentLoaded", function() {
             $("#mnt_date").flatpickr({
                 dateFormat: "d-m-Y",
                 minDate: "today", 
+                maxDate: new Date().fp_incr(30),
                 disable: selectedDate ? [selectedDate] : [], 
                 onChange: function(selectedDates, dateStr, instance) {
                     selectedDate = dateStr; 

@@ -54,7 +54,7 @@
 }
 
 .calactive { background-color: #58c437; }
-.cal-disabled { opacity: 0.5; background: #817c7a82; }
+.cal-disabled { opacity: 0.6; background: #817c7a82; }
 .cal-leave { opacity: 0.5; background: #817c7a82; }
 
 .cal-leave, .cal-disabled {

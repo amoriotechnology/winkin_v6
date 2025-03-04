@@ -42,7 +42,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('GetCustDetails')) { /* init GetCustDetails */
 		function GetCustDetails($id) {
 			getInstance()->load->model('Common_model');
@@ -57,15 +56,13 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('checkCustLogin')) { /* login check if not login redirect to login */
 		function checkCustLogin() {
 			getInstance()->load->library('session');
 			$custdata = getInstance()->session->userdata('login_cust_info');
-			return $custdata = (empty($custdata)) ? [] : $custdata;
+			return $custdata = (empty($custdata['cust_phone'])) ? [] : $custdata;
 		}
 	}
-
 
 	if (!function_exists('ImageUpload')) {
 	    function ImageUpload($imagename, $path, $width = "", $height = "") {
@@ -90,7 +87,6 @@ use Razorpay\Api\Api;
 	    }
 	}
 
-
 	if(!function_exists('showDate')) { /* format date for frontend view */
 		function showDate($date) {
 			$length = strlen($date);
@@ -104,7 +100,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('showTime')) { /* format date for frontend view */
 		function showTime($time) {
 			
@@ -116,7 +111,6 @@ use Razorpay\Api\Api;
 			return $showtime;
 		}
 	}
-
 
 	if(!function_exists('TimeDuration')) { /* duration calculation */
 		function TimeDuration($times, $duration) {
@@ -131,7 +125,6 @@ use Razorpay\Api\Api;
 			return $timedura;	
 		}
 	}
-
 
 	if(!function_exists('struDate')) { /* format date for db store */
 		function struDate($date) {
@@ -148,7 +141,6 @@ use Razorpay\Api\Api;
 			return $strudate;	
 		}
 	}
-
 
 	if(!function_exists('alertMsg')) { /* return alert msg color & sentence */
 		function alertMsg($name) {
@@ -176,7 +168,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('mintoHour')) { /* convert minutes to hour(s) */
 		function mintoHour($mins) {
 			$conv = ((float)$mins / 60);
@@ -191,7 +182,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('DateDiff')) { /* return days count of btw dates */
 		function DateDiff($date1, $date2) {
 			$start = struDate($date1);
@@ -201,7 +191,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('ExistorNot')) { /* return existing value */
 		function ExistorNot($table, $where) {
 			getInstance()->load->model('Common_model');
@@ -210,13 +199,11 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('AgeCal')) { /* return year diff count */
 		function AgeCal($dob) {
 			return ((int)date('Y') - (int)date('Y', strtotime($dob)));
 		}
 	}
-
 
 	if(!function_exists('pageConfig')) { /* return page config */
 		function pageConfig($url, $table, $where = NULL) {
@@ -246,7 +233,6 @@ use Razorpay\Api\Api;
 			return $pageconfig;
 		}
 	}
-
 
 	if(!function_exists('mergeCustAppointment')) { /* merge appointment based on appointment ID */
 		function mergeCustAppointment($records) {
@@ -307,7 +293,6 @@ use Razorpay\Api\Api;
 			return $appoint_rec;
 		}
 	}
-
 
 	if(!function_exists('GetWishes')) { /* get today bday and anniversary detail */
 		function GetWishes() {
@@ -395,18 +380,18 @@ use Razorpay\Api\Api;
 								                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">';
 									                    if(isset($data['content'])) {
 									                    	$template .= '<tr>
-											                            <td style="font-family:Poppins,Arial,sans-serif; font-size:14px; mso-line-height-rule: exactly;line-height: 1.5;padding-bottom:30px;color:#000000;text-align:center">
-											                              <p>'.$data['content'].'</p>
-											                            </td>
-											                          </tr>';
+																			<td style="font-family:Poppins,Arial,sans-serif; font-size:14px; mso-line-height-rule: exactly;line-height: 1.5;padding-bottom:30px;color:#000000;text-align:center">
+																			<p>'.$data['content'].'</p>
+																			</td>
+																		</tr>';
 									                    }
 									                    if(isset($data['wish_msg'])) {
 									                    	$template .= '<tr>
-                                                                <td style="font-family:Poppins,Arial,sans-serif; font-size:20px; text-align:center">
-                                                                  <p style="margin:0; color:#fff; font-weight:600">
+                                                                <td style="font-family:Poppins,Arial,sans-serif; font-size:20px; text-align:center; background-color: #fff;">
+                                                                  <p style="margin:0; color:#000; font-weight:600">
                                                                     Your OTP for password reset is: <strong>'.$data['wish_msg'].'</strong>
                                                                   </p>
-                                                                  <p style="margin:10px 0; color:#fff; font-size:16px;">
+                                                                  <p style="margin:10px 0; color:#000; font-size:16px;">
                                                                     Please use this One-Time Password (OTP) to reset your password. 
                                                                     Do not share this code with anyone for security reasons.
                                                                   </p>
@@ -430,7 +415,6 @@ use Razorpay\Api\Api;
 		}
 	}
 
-
 	if(!function_exists('EmailConfig')) { /* get today bday and anniversary detail */
 		function EmailConfig() {
 			$settings = getSettingData();
@@ -448,7 +432,6 @@ use Razorpay\Api\Api;
 			return $emailconfig;
 		}
 	}
-
 
 	if(!function_exists('SendEmail')) { /* get today bday and anniversary detail */
 		function SendEmail($to, $cc, $bcc, $subj, $msg, $attachment = NULL) {
@@ -494,8 +477,8 @@ use Razorpay\Api\Api;
 			if(!empty($data)) {
 				$amount = (float)$data['amount'] - ((isset($data['couponAmount']) && !empty($data['couponAmount'])) ? (float)$data['couponAmount'] : 0);
 
-				$timeing= implode(',',$data['time']);
-				$timing = BookingTime($timeing);
+				$gettime= implode(',',$data['time']);
+				$timing = BookingTime($gettime);
 				$template = '<!DOCTYPE html>
 								<html>
 								  <head>
@@ -605,45 +588,45 @@ use Razorpay\Api\Api;
 								      <div style="max-width: 680px; margin: 0 auto;" class="email-container">
 								    
 								          <div class="content bg-primary">
-								              <div class="div-left">
-								                <p class="text-white">Payment successfully <small><br>processed on '.showDate(CURDATE).'</small></p>
-								                <h1>₹'.round($amount, 2).'</h1>
-								              </div>
+								              <table class="width: 100%">';
+													if ($data['payment_method'] !== '') {
+														$template .=  '<tr> <th> Payment successfully processed on '.showDate(CURDATE).' </th> </tr>';
+													} else {
+														$template .=  '<tr> <th> Payment is Pending </th> </tr>';
+													}
+													$template .=  '<tr> <th> <h2> ₹'.round($amount, 2).'</th> </tr> </h2>
+												</table>
+								          </div>';
+										  if ($data['payment_method'] !== '') {
+											$template .=  '<p> Your payment against WINKIN for ₹'.round($amount, 2).' is successful.</p>';
+										 } else {
+											$template .=  '<p> Your payment against WINKIN for ₹'.round($amount, 2).' is pending. </p>';
+										 }
+										
+								        $template .= '<table width="100%" border="0">
+														<tr class="container">
+															<th> BOOKING ID : <span class="text-muted">#'.$data['appoint_id'].'</span> </th>
+														</tr>';
+														if ($data['payment_method'] !== '') {
+															$template .= '<tr class="container"> <th> AMOUNT ₹: <span class="text-muted">'.round($amount, 2).'</span> </th> </tr>
+															<tr class="container"><th> PAYMENT MODE : <span class="text-muted">'.$data['payment_method'].'</span> </th></tr>';
+														}
 
-								              <div class="div-right">
-								                <img src="data:image/png;base64,'.base64_encode(file_get_contents('assets/images/company_imgs/verified.png')).'" width="50%" height="50%">
-								              </div>
-								          </div>
+										$template .= '<tr class="container">
+															<th> COURT : <span class="text-muted">'.(($data['court'] == 'courtA') ? "Court A" : "Court B").'</span> </th>
+														</tr>
+														<tr class="container">
+															<th> SLOT DATE : <span class="text-muted">'.$data['date'].'</span> </th>
+														</tr>
+														<tr class="container">
+															<th> SLOT TIME : <span class="text-muted">'.$timing.'</span> </th>
+														</tr>
+													</table>';	
 
-								          <p> Your payment of ₹'.round($amount, 2).' to WINKIN has been successfully processed. </p>
+								        $template .= '<p> Track all your booking details easily through your <a href="https://winkin.in">Winkin My Bookings page</a>.</p>
+							  			  			  <p> PFA(Please Find Attachment).</p>
 
-								          <div class="container">
-								            <div class="div-left">
-								              Booking ID: <br>
-								              <span class="text-muted"> #'.$data['appoint_id'].'</span> <br><br>
-								              Amount: <br>
-								              <span class="text-muted">₹'.round($amount, 2).'</span> <br><br>
-								              Area: <br>
-								              <span class="text-muted">'.$data['court'].'</span>
-								            </div>
-
-								            <div class="div-left">
-								              Date: <br>
-								              <span class="text-muted">'.$data['date'].'</span> <br><br>
-								              Paymode: <br>
-								              <span class="text-muted">Online</span> <br><br>
-								              Timing: <br>
-								              <span class="text-muted">'.$timing.'</span>
-								            </div>
-								          </div>
-
-								          <p> Track all your booking details easily through your <a href="https://winkin.in">Winkin My Bookings page</a>.</p>
-
-								          <div class="container">
-								            <p class="text-center">
-								              Copyright © 2025. All rights reserved.
-								            </p>
-								          </div>
+								          <div class="container"> <p class="text-center"> Copyright © 2025. All rights reserved.</p> </div>
 								        </div>
 								    </center>
 								  </body>
@@ -652,7 +635,6 @@ use Razorpay\Api\Api;
 			return $template;
 		}
 	}
-
 
 	if(!function_exists('Bgcolors')) { /* get today bday and anniversary detail */
 		function Bgcolors($type) {
@@ -721,7 +703,6 @@ use Razorpay\Api\Api;
 
 	//	 $rate = isset($data['amount']) ? (float)$data['amount'] : 0;
 	//	 $rate = isset($data['amount']) ? round((float)$data['amount'], 2) : 0;
-
 			$rate = 1;
 			$gst = isset($data['gst']) ? (float)$data['gst'] : 0;
 			$paycharge = isset($data['pay_charge']) ? (float)$data['pay_charge'] : 0;
@@ -817,6 +798,19 @@ use Razorpay\Api\Api;
 		}
 	}
 
+	// Align time order asc
+	if(!function_exists('ArrayTimeAlign')) {
+	    function ArrayTimeAlign($arrayValue) {
+	        usort($arrayValue, function($a, $b) {
+				// Convert time string to 24-hour format and compare
+				$timeA = DateTime::createFromFormat('h:i A', $a[3])->format('H:i');
+				$timeB = DateTime::createFromFormat('h:i A', $b[3])->format('H:i');
+				
+				return strcmp($timeA, $timeB);
+			});
+	        return $arrayValue;
+	    }
+	}
 
 
 

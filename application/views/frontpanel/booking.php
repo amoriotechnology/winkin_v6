@@ -49,7 +49,7 @@
         border-radius: 25px 0px 0px 25px;
     }
     
-  .wizard-nav {
+    .wizard-nav {
         display: none !important;
     }
 
@@ -66,6 +66,11 @@
     background-color: transparent;
     padding-right: 10px;
 }
+
+    small{
+        font-size: 1.0em
+        font-weight: bold;
+    }
 
 </style>
 
@@ -388,11 +393,11 @@ if(!empty($edit_appoint)) {
                                                             <table class="table nowrap text-nowrap border mt-4">
                                                                 <thead class="table-dark">
                                                                     <tr class="text-center">
-                                                                        <th>Venue Date</th>
-                                                                        <th>Court Name</th>
+                                                                        <th>Slot Date</th>
+                                                                        <th>Court</th>
                                                                         <th>Duration</th>
-                                                                        <th>Time</th>
-                                                                        <th>Rate ₹</th>
+                                                                        <th>Timing(s)</th>
+                                                                        <th>Amount ₹</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody id="billbody"></tbody>
@@ -558,15 +563,14 @@ $(document).ready(function() {
         }
     });
 
-
     $('body').on("click", "#forget_pwd", function() {
         $('.sign-btn').html('Don&apos;t have an account? <a href="javascript:void(0)" id="sign-btn" data-title="change_pwd" class="fs-14 text-info"> SIGN UP </a> ');
         $(".change-pwd-tab").removeClass('d-none');
-        $(".sign-in-tab").addClass('d-none');
+        $("#change_email, #otp_no, #new_password, #confirm_password").val('');
+        $('.phone-msg').html('');
+        $(".sign-in-tab, .otp_field, #validate_btn, .new_pwd_field, .confirm_pwd_field, #change_pass_btn, .login-alert").addClass('d-none');
         $('.next').attr('disabled', 'disabled');
     });
-
-
 
     $('body').on('click', "input[name='times[]']", function() {
 
@@ -588,7 +592,7 @@ $(document).ready(function() {
         $("#book_date_show").html(displayDate(new Date()));
     });
 
-
+    $("#viewTimes").html('');
     var clickcount = 0;
     var allUnchecked = false;
     $('body').on('click', ".time-btn0, input[name='times[]']", function() {
@@ -602,14 +606,14 @@ $(document).ready(function() {
         var next_input = $('.'+next_td).children().children().children().children();
         var next_input = next_input[1];
         var cont_td = $(prev_input).prop('checked');
-        var duration = 0;
-        var rate = 0;
+        
         if ($(input).prop('checked')) {
             $(input).prop('checked', false);
         } else {
             $(input).prop('checked', true);
         }
         var ctiming = [];
+        var duration = 0; var rate = 0;
         $("input[name='times[]']:checked").each(function() {
             ctiming.push($(this).val());
             duration += 30;
@@ -622,6 +626,7 @@ $(document).ready(function() {
             if(clickcount >= 1 && (cont_td == false || cont_td == undefined)) {
                 $(input).prop('checked', false);
                 ctiming = [];
+                var duration = 0; var rate = 0;
                 $("input[name='times[]']:checked").each(function() {
                     ctiming.push($(this).val());
                     duration += 30;
@@ -642,7 +647,6 @@ $(document).ready(function() {
         getTimeRate(ctiming[0], duration, rate);
     });
 
-    
     /* --------- activate when page load ------------ */
     getdetails('<?= base_url('getCourtTiming') ?>', {[csrfName]: csrfHash, court:appcourt, date:appdate, apptime:apptime, appkey:appkey}, 'courtCal');
 
@@ -697,6 +701,7 @@ $(document).ready(function() {
 
         $('#courtCal').empty();
         if(courts != "") {
+            $("#viewTimes").html('');
             getdetails('<?= base_url('getCourtTiming') ?>', {[csrfName]: csrfHash, court:courts, date:appdate, apptime:apptime}, 'courtCal');
         }
     });
@@ -723,6 +728,7 @@ $(document).ready(function() {
 
         $('#courtCal').empty();
         if(selectedDate != "" && court != "") {
+            $("#viewTimes").html('');
             getdetails('<?= base_url('getCourtTiming') ?>', {[csrfName]:csrfHash, court:court, date:selectedDate, apptime:apptime}, 'courtCal');
         }
     });
@@ -759,7 +765,7 @@ $(document).ready(function() {
 
                 } else if(res.status == 400) {
                     $('.otp_field, #validate_btn').addClass('d-none');
-                    $(".phone-msg").removeClass('text-success').addClass('text-danger').html('Enter a valid phone number');
+                    $(".phone-msg").removeClass('text-success').addClass('text-danger').html('Enter a valid email address');
                     setTimeout(function () {
                         $("#forget_btn").html('Resend OTP').removeAttr('disabled');
                     }, 1000);
@@ -769,6 +775,9 @@ $(document).ready(function() {
         });
     });
 
+    $("#otp_no").on('keydown', function() {
+        $(".new_pwd_field, .confirm_pwd_field").addClass('d-none');
+    });
 
     /* ----- Validate OTP Number ----- */
     $('#validate_btn').on('click', function(e) {
@@ -837,6 +846,7 @@ $(document).ready(function() {
                     setTimeout(function () {
                         $('.change-pwd-tab').addClass('d-none');
                         $('.sign-in-tab').removeClass('d-none');
+                        $('.next').attr('disabled', 'disabled');
                         /*window.location.href = '<?= base_url("login"); ?>';*/
                     }, 2000);
                 } else {
@@ -883,7 +893,7 @@ $(document).ready(function() {
 
         var paymentType = $('select[name="pay_mode"]').val();
         var submitButton = $('button[type="submit"]');
-        // submitButton.prop('disabled', true).text('Loading...');
+        submitButton.prop('disabled', true).text('Loading...');
 
         var appoint_status = false;
         var newapp_id = "";
@@ -1154,13 +1164,12 @@ function getCourtTable(court_data) {
     $('#billbody').append(tbody);
     $('#billfoot').append(tfoot);
 
-
     // applycoupon($('#coupon_name').val(), $('#tot_amt').val());
 }
 
 function getTimeRate(starttime, duration, rate) {
 
-    var viewtimes = "Selected Timings: <b>"+starttime+" - "+DisplayTime(starttime, parseInt(duration))+"</b> <br> Rate: <b>"+rate+"</b>";
+    var viewtimes = "Selected Timings: <b>"+starttime+" - "+DisplayTime(starttime, parseInt(duration))+"</b> <br> Amount ₹: <b>"+rate+"</b>";
     viewtimes = (starttime == undefined) ? "" : viewtimes;
     $("#viewTimes").html(viewtimes);
 }

@@ -217,24 +217,22 @@ if(!empty($edit_appoint)) {
                                                                     <div class="col-xl-6">
                                                                         <p class="fw-medium text-muted mb-1">Date Issued :
                                                                             <?= !empty($app_date) ? showDate($app_date) : date('M d/Y'); ?> - <span class="text-muted fs-12"> <?= !empty($app_time) ? $app_time : date('h:i a'); ?></span>
-                                                                        </p>
-                                                                    
+                                                                        </p>                                                                    
                                                                         <div class="table-responsive">
                                                                             <table class="table nowrap text-nowrap border mt-4">
                                                                                 <thead class="table-dark">
                                                                                     <tr class="text-center">
-                                                                                        <th>Area</th>
-                                                                                        <th>Duration</th>
-                                                                                        <th>Timing(s)</th>
-                                                                                        <th>Rate</th>
+                                                                                        <th>COURT</th>
+                                                                                        <th>DURATION</th>
+                                                                                        <th>TIMING</th>
+                                                                                        <th>AMOUNT (₹)</th>
                                                                                     </tr>
                                                                                 </thead>
                                                                                 <tbody id="billbody"></tbody>
                                                                                 <tfoot id="billfoot"></tfoot>
                                                                             </table>
                                                                         </div>
-                                                                    </div>                                                                    
-
+                                                                    </div>
                                                                     </div>
                                                                 </div>
 
@@ -265,6 +263,80 @@ if(!empty($edit_appoint)) {
 
 <!--------------- Update Appointment Payment -------------->
 <div class="modal fade" id="PaymentModal" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="PaymentModalToggleLabel" tabindex="-1" aria-hidden="true" style="display: none;">
+<<<<<<< HEAD
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h6 class="modal-title text-white" id="PaymentModalToggleLabel">Payment Detail</h6>
+                <button type="button" class="btn btn-danger opacity-100 rounded-circle btn-close" data-bs-dismiss="modal" onclick="closeModel('')" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th class="table-info text-uppercase" width="30%">Booking ID</th>
+                            <td><b><span id="payapp_id" class="text-primary h5"></span></b></td>
+                        </tr>
+                        <tr>
+                            <th class="table-info text-uppercase" width="30%">Booking Date</th>
+                            <td><span id="paybook_date"></span></td>
+                        </tr>
+                        <tr>
+                            <th class="table-info text-uppercase" width="30%">Booked Date</th>
+                            <td><span id="payapp_date"></span></td>
+                        </tr>
+                        <tr>
+                            <th class="table-info text-uppercase" width="30%">Booking Time</th>
+                            <td><span id="payapp_time"></span></td>
+                        </tr>
+                        <tr>
+                            <th class="table-info text-uppercase" width="30%">First Name</th>
+                            <td><span id="payapp_name"></span></td>
+                        </tr>
+                        <tr>
+                            <th class="table-info text-uppercase" width="30%">Last Name</th>
+                            <td><span id="payapp_lname"></span></td>
+                        </tr>
+                        <tr>
+                            <th class="table-info text-uppercase" width="30%">Phone</th>
+                            <td><span id="payapp_number"></span></td>
+                        </tr>
+                        <tr>
+                            <th class="table-info text-uppercase" width="30%">Email</th>
+                            <td><span id="payapp_email"></span></td>
+                        </tr>
+
+                        <tr> <th> <td></td> </th> </tr>
+
+                        <tr class="table-info text-center">
+                            <th class="text-uppercase">Court Area</th>
+                            <th class="text-uppercase">Duration</th>
+                            <th class="text-uppercase">Timing(S)</th>
+                            <th class="text-uppercase">Rate(₹)</th>
+                        </tr>
+                        <tbody id="payservbody"></tbody>
+                        <tfoot id="payservfoot"></tfoot>
+                    </table>
+                    <form method="post" id="payment_form">
+                        <div class="row mb-3">
+                            <div class="col-md-8 mt-2">
+                                <div class="input-group">
+                                    <label for="payamount" class="form-label mt-2"> <b>AMOUNT: &nbsp;</b> </label>
+                                    <input type="text" name="payamount" id="payamount" class="form-control" oninput="AmtOnly(this, 10)" onkeyup="restrictPayment(this.value);" readonly>
+                                </div>
+                                <span class="payment-error-msg text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 float-end mt-2">
+                                <input type="hidden" name="billamount" id="billamount" value="">
+                                <input type="hidden" name="appointid" id="appointid" value="">
+                                <button type="submit" id="payment_submit" class="btn btn-success" >Save</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+      
+=======
 <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
         <div class="modal-header bg-primary">
@@ -310,10 +382,10 @@ if(!empty($edit_appoint)) {
                     <tr> <th> <td></td> </th> </tr>
 
                     <tr class="table-info text-center">
-                        <th class="text-uppercase">Court Area</th>
-                        <th class="text-uppercase">Duration</th>
-                        <th class="text-uppercase">Timing(S)</th>
-                        <th class="text-uppercase">Rate(₹)</th>
+                        <th class="text-uppercase">COURT</th>
+                        <th class="text-uppercase">DURATION</th>
+                        <th class="text-uppercase">TIMING</th>
+                        <th class="text-uppercase">AMOUNT (₹)</th>
                     </tr>
                     <tbody id="payservbody"></tbody>
                     <tfoot id="payservfoot"></tfoot>
@@ -335,11 +407,10 @@ if(!empty($edit_appoint)) {
                         </div>
                     </div>
                 </form>
+>>>>>>> 04d5b6ef28f95a6c764cdab06ef3e3fbfd32b0d7
             </div>
-  
         </div>
     </div>
-</div>
 </div>
 
 
@@ -384,34 +455,35 @@ function PaymentData(appid) {
                     var courtname = 'Court B';
                     if(value[0] == 'courtA') { courtname = 'Court A'; }
 
-                    tbody += '<tr class="text-center"> <td>' + courtname + '</td>  <td>' + value[1] + '</td> <td>' + starttime+' - '+endtime + '</td> <td>' + (value[2] / 1.18).toFixed(2) + '</td> </tr>';
+                    tbody += '<tr class="text-center"> <td>' + courtname + '</td> <td>' + value[1] + ' mins</td> <td>' + starttime + ' - ' + endtime + '</td> <td>' + (value[2] / 1.18).toFixed(2) + '</td> </tr>';
                     rate += parseFloat((value[2] / 1.18).toFixed(2));
                 }
+
                 // '<tr class="table-info text-center"> ' +
                    //     '<td colspan="3" align="right"> <b>DISCOUNT( '+res[key].coup_perc+'% ): </b></td> ' +
                       //  '<td><b>' + parseFloat(res[key].app_cpamt).toFixed(2) + '</b> </td> </tr>' +
-                       var subtotal = rate.toFixed(2);
-                        var gst = (parseFloat(res[key].app_gst) || 0).toFixed(2);
-                        var total =  (parseFloat(subtotal+gst)).toFixed(2);
-                  var tfoot = '<tr class="table-info text-center"> ' +
+                    var subtotal = rate.toFixed(2);
+                    var gst = (parseFloat(res[key].app_gst) || 0).toFixed(2);
+                    var total =  (parseFloat(subtotal+gst)).toFixed(2);
+                    var tfoot = '<tr class="table-info text-center"> ' +
                     
-                        '<td colspan="3" align="right"> <b>Sub TOTAL: </b></td> ' +
+                        '<td colspan="3" align="right"> <b>SUBTOTAL: </b></td> ' +
                         '<td><b>' + rate.toFixed(2) + '</b> </td> </tr>' +
                        '<tr class="table-info text-center"> ' +
-                            '<td colspan="3" align="right"> <b>GST (18%) : </b></td> ' +
+                            '<td colspan="3" align="right"> <b>GST AMOUNT (18%) : </b></td> ' +
                             '<td> <b>' + gst + '</b> </td>' + 
                             '</tr>' + 
-                                                     '<tr class="table-info text-center"> ' +
-                                '<td colspan="3" align="right"> <b>Total : </b></td> ' +
+                            '<tr class="table-info text-center"> ' +
+                                '<td colspan="3" align="right"> <b>TOTAL : </b></td> ' +
                                 '<td> <b>' + (parseFloat(subtotal) + parseFloat(gst)).toFixed(2) + '</b> </td>' + 
                             '</tr>' +
 
-                    '<tr class="table-info text-center"> ' +
-                        '<td colspan="3" align="right"> <b>PAID: </b></td> ' +
-                        '<td><b>' + res[key].app_paid + '</b> </td> </tr>' +
-                    '<tr class="table-info text-center"> ' +
-                        '<td colspan="3" align="right"> <b>BALANCE (Round Off): </b></td> ' +
-                        '<td><b>' + (parseFloat(res[key].app_balance) <= 0 ? rate : res[key].app_balance) + '</b> </td> </tr>';
+                '<tr class="table-info text-center"> ' +
+                    '<td colspan="3" align="right"> <b>PAID: </b></td> ' +
+                    '<td><b>' + res[key].app_paid + '</b> </td> </tr>' +
+                '<tr class="table-info text-center"> ' +
+                    '<td colspan="3" align="right"> <b>BALANCE (Round Off): </b></td> ' +
+                    '<td><b>' + (parseFloat(res[key].app_balance) <= 0 ? rate : res[key].app_balance) + '</b> </td> </tr>';
 
                 $('#payservbody').append(tbody);
                 $('#payservfoot').append(tfoot);
@@ -700,38 +772,6 @@ $(document).ready(function() {
         });
     });
 
-    /*$("#appointment_form").submit(function(e) {
-        e.preventDefault();
-
-        var amt = restrictAmt($('#amt').val());
-        if(amt === false) { return amt; }
-
-        var paymentType = $('select[name="paymode"]').val();
-        var submitButton = $('button[type="submit"]');
-        submitButton.prop('disabled', true).text('Loading...');
-
-        $
-
-        $.ajax({
-            url: '<?= base_url('add_booking') ?>',
-            type: 'post',
-            data : $(this).serialize(),
-            dataType: 'json',
-            success : function (res) {
-                
-                if(res.status == 200) {
-                    submitButton.prop('disabled', false).text('Book Appointment');
-                    AlertPopup('Success!', 'Court Booked Successfully!', 'success', 'Ok', 'bookings');
-                } else {
-                    submitButton.prop('disabled', false).text('Book Appointment');
-                    AlertPopup('Failed!', 'Court Not Booked Successfully!', 'error', 'Try Again', 'bookings');
-                }
-            }, 
-            error: function(xhr, status, error) { submitButton.prop('disabled', false).text('Book Appointment'); console.log(xhr.responseText); }
-       });
-    });*/
-
-
     $("body").on('click', '.cancel-confirm', function () {
       Swal.fire({
         title: "Are you sure?",
@@ -872,15 +912,15 @@ function getCourtTable(court_data) {
         var grandTotal = courttotal;
 
         tblfoot += "<tr class='showCoupon d-none'>"+
-                        "<td colspan='3' align='right'> <b>Coupon Percent % :</b> </td>"+
+                        "<td colspan='3' align='right'> <b>COUPON PERCENT % :</b> </td>"+
                         "<td align='center' id='coupon_Percent'></td> </tr>"+
                     " <tr class='showCoupon d-none'>"+
-                        "<td colspan='3' align='right'> <b>Coupon Amount :</b> </td>"+
+                        "<td colspan='3' align='right'> <b>COUPON AMOUNT :</b> </td>"+
                         "<td align='center' id='coupon_Amount'></td> </tr>"+
                     " <tr>"+
-                        "<td colspan='3' align='right'> <b>Subtotal :</b> </td>"+
+                        "<td colspan='3' align='right'> <b>SUBTOTAL :</b> </td>"+
                         "<td align='center'><span id='sub_Amount'> ₹"+courttotal+"</span></td> </tr>"+
-                    "<tr> <td colspan='3' align='right'> <b>Total :</b> <br> <small>(Including GST)</small> </td>"+
+                    "<tr> <td colspan='3' align='right'> <b>TOTAL :</b> <br> <small>(Including GST)</small> </td>"+
                         "<td align='center'> <span id='total_Amount'> ₹"+grandTotal+"</span>"+
                         "<input type='hidden' id='tot_amt' value='"+grandTotal+"' >"+
                         "<input type='hidden' id='getAmount' name='getAmount' value='"+storeGstAmount+"' >"+

@@ -29,7 +29,6 @@
                                 <div class="col-xl-4 col-md-12 col-sm-12">
                                     <div class="input-group">
                                         <input type="text" name="datefilter" id="datefilter" class="form-control datefilter" placeholder="Search date">
-                                        <button type="button" id="search" class="btn btn-primary">Search</button>&nbsp;
                                         <a href="<?= base_url('bookings') ?>" id="search" class="btn btn-primary">Refresh</a>
                                     </div>
                                 </div>
@@ -91,50 +90,51 @@
         if(edit_appoint > 0) {
             $('#AppointmentModal').modal('show');
         }
- // Release and Confirm on change by the Admin , when the booking is empty
-function handleStatusAction(id,status, inputLabel = '', inputPlaceholder = '') {
-    let swalOptions = {
-        showCancelButton: true,
-        confirmButtonText: 'OK',
-        cancelButtonText: 'Cancel',
-    };
-    if (status === 'admin_update') {
-          swalOptions.title = 'Select Payment Mode';
-            swalOptions.input = 'select'; 
-            swalOptions.inputPlaceholder = inputPlaceholder || 'Select the payment mode';
-            swalOptions.inputOptions = {
-                'Cash': 'Cash',
-                'Upi': 'Upi',
-                'Online': 'Online',
+ 
+        // Release and Confirm on change by the Admin , when the booking is empty
+        function handleStatusAction(id,status, inputLabel = '', inputPlaceholder = '') {
+            let swalOptions = {
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Cancel',
             };
-        swalOptions.preConfirm = (paymentMode) => {
-            if (!paymentMode) {
-                Swal.showValidationMessage('Please enter a payment mode');
-            } else {
-                sendAjaxRequest(status,{ id: id, paymentMode: paymentMode });
+            if (status === 'admin_update') {
+                swalOptions.title = 'Select Payment Mode';
+                    swalOptions.input = 'select'; 
+                    swalOptions.inputPlaceholder = inputPlaceholder || 'Select the payment mode';
+                    swalOptions.inputOptions = {
+                        'Cash': 'Cash',
+                        'Upi': 'Upi',
+                        'Online': 'Online',
+                    };
+                swalOptions.preConfirm = (paymentMode) => {
+                    if (!paymentMode) {
+                        Swal.showValidationMessage('Please enter a payment mode');
+                    } else {
+                        sendAjaxRequest(status,{ id: id, paymentMode: paymentMode });
+                    }
+                };
+            } else if (status === 'Cancelled') {
+                swalOptions.title = 'Are you sure?';
+                swalOptions.text = 'Do you really want to cancel?';
+                swalOptions.icon = 'warning';
+                swalOptions.confirmButtonText = 'Yes, Cancel it!';
+                swalOptions.cancelButtonText = 'No, Keep it';
+                swalOptions.preConfirm = (paymentMode) => {
+                    if (!paymentMode) {
+                        Swal.showValidationMessage('Please enter a payment mode');
+                    } else {
+                        sendAjaxRequest(status,{ id: id, paymentMode: paymentMode });
+                    }
+                };
             }
-        };
-    } else if (status === 'Cancelled') {
-        swalOptions.title = 'Are you sure?';
-        swalOptions.text = 'Do you really want to cancel?';
-        swalOptions.icon = 'warning';
-        swalOptions.confirmButtonText = 'Yes, Cancel it!';
-        swalOptions.cancelButtonText = 'No, Keep it';
-        swalOptions.preConfirm = (paymentMode) => {
-            if (!paymentMode) {
-                Swal.showValidationMessage('Please enter a payment mode');
-            } else {
-                sendAjaxRequest(status,{ id: id, paymentMode: paymentMode });
-            }
-        };
-    }
-    Swal.fire(swalOptions);
-}
+            Swal.fire(swalOptions);
+        }
 
-function sendAjaxRequest(status, data = {}) {
-      var csrfName = "<?= $this->security->get_csrf_token_name() ?>";
-      var csrfHash = "<?= $this->security->get_csrf_hash() ?>";
-  $.ajax({
+        function sendAjaxRequest(status, data = {}) {
+            var csrfName = "<?= $this->security->get_csrf_token_name() ?>";
+            var csrfHash = "<?= $this->security->get_csrf_hash() ?>";
+            $.ajax({
                 url: '<?= base_url('common_update'); ?>',
                 type: 'post',
                 data: { [csrfName]: csrfHash,  type:status,...data, coloum:'fld_astatus', table:'update_status' },
@@ -146,7 +146,8 @@ function sendAjaxRequest(status, data = {}) {
                     AlertPopup('Success!', "Booking status updated as "+status+"!!!", 'success', 'Ok', '');
                 }
             });
-}
+        }
+        
    $("body").on('click', ".release_confirm", function() {
             var csrfName = "<?= $this->security->get_csrf_token_name() ?>";
             var csrfHash = "<?= $this->security->get_csrf_hash() ?>";
@@ -382,7 +383,7 @@ function sendAjaxRequest(status, data = {}) {
             ],
         });
 
-        $('#search').on('click', function() {
+        $('#datefilter').on('change', function() {
             table.draw();
         });
         
@@ -397,11 +398,3 @@ function sendAjaxRequest(status, data = {}) {
 
 <!-- Date & Time Picker JS -->
 <script src="<?= base_url('../assets/libs/flatpickr/flatpickr.min.js'); ?>"></script>
-
-<!-- Vanilla-Wizard JS -->
-<script src="<?= base_url('../assets/libs/vanilla-wizard/js/wizard.min.js'); ?>"></script>
-
-<!-- Internal Form Wizard JS -->
-<link rel="modulepreload" href="<?= base_url('../assets/js/form-wizard-init.js'); ?>" />
-<script type="module" src="<?= base_url('../assets/js/form-wizard-init.js'); ?>"></script>
-<script src="<?= base_url('../assets/js/form-wizard.js'); ?>"></script>
