@@ -540,8 +540,8 @@ use Razorpay\Api\Api;
 			$template = "";
 			if(!empty($data)) {
 				$amount = (float)$data['amount'] - ((isset($data['couponAmount']) && !empty($data['couponAmount'])) ? (float)$data['couponAmount'] : 0);
-				$timing = implode(' , ', $data['time']);
-				$timing = BookingTime($timing);
+				$gettime= implode(',',$data['time']);
+				$timing = BookingTime($gettime);
 				$template = '<!DOCTYPE html>
 								<html>
 								  <head>
@@ -672,13 +672,13 @@ use Razorpay\Api\Api;
 														}
 
 										$template .= '<tr class="container">
-															<th> COURT : <span class="text-muted">'.$data['court'].'</span> </th>
+															<th> COURT : <span class="text-muted">'.(($data['court'] == 'courtA') ? "Court A" : "Court B").'</span> </th>
 														</tr>
 														<tr class="container">
 															<th> SLOT DATE : <span class="text-muted">'.$data['date'].'</span> </th>
 														</tr>
 														<tr class="container">
-															<th> TIMINMG : <span class="text-muted">'.$timing.'</span> </th>
+															<th> SLOT TIME : <span class="text-muted">'.$timing.'</span> </th>
 														</tr>
 													</table>';										
 							  

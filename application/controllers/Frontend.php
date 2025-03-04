@@ -400,7 +400,6 @@ class Frontend extends CI_Controller {
     exit;
   }
 
-
   public function add_cust_booking() {
 
     $info = checkCustLogin();
@@ -630,7 +629,6 @@ class Frontend extends CI_Controller {
     }
 
     $response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc'), 'appoint_id' => $AppointID] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
-
     echo json_encode($response);
     exit;
   }
@@ -659,7 +657,7 @@ class Frontend extends CI_Controller {
 		}
 
     $result = 0;
-    $app_detail = $this->Common_model->GetJoinDatas('appointments A', 'customers C', 'A.fld_acustid = C.fld_id', '`fld_aid`, `fld_appointid`, `fld_name`, `fld_email`, `fld_phone`, `fld_aserv`, `fld_adate`, `fld_atime`, `fld_arate`, `fld_acpamt`', ['fld_appointid' => $appoint_id]);
+    $app_detail = $this->Common_model->GetJoinDatas('appointments A', 'customers C', 'A.fld_acustid = C.fld_id', '`fld_aid`, `fld_appointid`, `fld_name`, `fld_email`, `fld_phone`, `fld_aserv`, `fld_adate`, `fld_atime`, `fld_arate`, `fld_acpamt`, `fld_apaymode`', ['fld_appointid' => $appoint_id]);
     if(!empty($app_detail)) {
       $balance = ((float)$app_detail[0]['fld_arate'] - (float)$paydata['amount']);
       $this->Common_model->UpdateData('appointments', ['fld_astatus' => $status, 'fld_payment_id' => $payment_id, 'fld_order_id' => $order_id, 'fld_signature' => $signature, 'fld_apaystatus' => $paydata['status'], 'fld_abalance' => $balance], ['fld_appointid' => $appoint_id]);
@@ -677,7 +675,7 @@ class Frontend extends CI_Controller {
       $gst_amount = 0;
       $payment_amount = $app_detail[0]['fld_arate'];
 
-      $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $appoint_id, 'court' => $court, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => $coupon_amount, 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
+      $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $appoint_id, 'payment_method' => $app_detail[0]['fld_apaymode'], 'court' => $court, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => $coupon_amount, 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
 
       $Pdf = $this->pdf_generate($appoint_id);
       $mail = SendEmail($tomail, "", "", $subject, $bookingtemplates, $Pdf);

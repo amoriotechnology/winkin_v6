@@ -6,6 +6,7 @@ class Settings extends CI_Controller {
 
     public $load, $input;
 
+
     public function __construct() {
         parent::__construct();
         $this->load->model('Common_model');
@@ -18,7 +19,9 @@ class Settings extends CI_Controller {
             "fld_apaymode" => 'cash',
         ]);
 
+
         $checkdaycloseStatus = $this->Common_model->check_dayclose_status();
+
 
         if (isset($checkdaycloseStatus[0]) && $checkdaycloseStatus[0]['status'] == 1) {
             $daycloses = [];
@@ -50,6 +53,7 @@ class Settings extends CI_Controller {
         ];
         $this->load->view('template', $data);
     }
+
 
     public function add_attend() {
 
@@ -180,6 +184,7 @@ class Settings extends CI_Controller {
         if (! empty($getcalender)) {
             foreach ($getcalender as $cal) {
                 $holidays .= '<li class="border-0 border-bottom mt-3">
+
 						        <p class="fs-16 mb-1 fw-medium">' . htmlspecialchars($cal['fld_satitle']) . '
 						            <span class="float-end gap-3">
 						                <!-- Edit Button -->
@@ -195,6 +200,7 @@ class Settings extends CI_Controller {
 						        </p>
 						        <p class="fs-12 mb-0 text-muted">' . showDate($cal['fld_sadate']) . ' - ' . date('D', strtotime($cal['fld_sadate'])) . '</p>
 						    </li>';
+
             }
         } else {
             $holidays = '<p class="border-0 border-bottom mt-3 text-center"> No Records Found!!! </p>';
@@ -270,6 +276,7 @@ class Settings extends CI_Controller {
         echo json_encode($response);
         exit;
     }
+
 
     public function common_update() {
         $id     = trim($this->input->post('id', TRUE));
@@ -415,6 +422,7 @@ class Settings extends CI_Controller {
         echo json_encode($response);
         exit;
     }
+
 
     public function change_password() {
 

@@ -268,586 +268,575 @@ class Backend extends CI_Controller {
 
             logEntry('Add Customer', 'Customer', 'Customer Added successfully', 'Add', '');
 
-            $result = $this->Common_model->InsertData('customers', $values);
-        }
-
-        $response = ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
-
-        if ($result > 0) {
-            $response = ['status' => 200, 'alert_msg' => alertMsg('add_suc')];
-        }
-
-        echo json_encode($response);
-    }
-
-    /* --------------- insert / edit service ----------------- */
-    public function add_service() {
-        $sid            = trim($this->input->post('sid', TRUE));
-        $cate           = trim($this->input->post('cate', TRUE));
-        $serv_name      = trim($this->input->post('serv_name', TRUE));
-        $duration       = trim($this->input->post('serv_duration', TRUE));
-        $split_duration = explode(":", $duration);
-        $serv_dura      = (($split_duration[0] * 60) + $split_duration[1]);
-        $serv_rate      = trim($this->input->post('serv_rate', TRUE));
-        $serv_type      = trim($this->input->post('serv_type', TRUE));
-        $serv_desc      = trim($this->input->post('serv_desc', TRUE));
-
-        $values = ['fld_scate' => $cate, 'fld_sname' => $serv_name, 'fld_sduration' => $serv_dura, 'fld_srate' => $serv_rate, 'fld_stype' => $serv_type, 'fld_sdesc' => $serv_desc];
-
-        if (! empty($sid)) {
-            $result = $this->Common_model->UpdateData('services', $values, ['fld_sid' => $sid]);
-        } else {
-            $result = $this->Common_model->InsertData('services', $values);
-        }
-
-        $response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
-        echo json_encode($response);
-    }
-
-    /* --------------- insert / edit staff ---------------- */
-    public function add_staff() {
-        $staff_id          = trim($this->input->post('staff_id', TRUE));
-        $staff_name        = trim(ucfirst($this->input->post('staff_name', TRUE)));
-        $staff_phone       = trim($this->input->post('staff_phone', TRUE));
-        $staff_email       = trim($this->input->post('staff_email', TRUE));
-        $staff_doj         = struDate(trim($this->input->post('staff_doj', TRUE)));
-        $staff_designation = trim($this->input->post('staff_designation', TRUE));
-        $staff_anni        = struDate(trim($this->input->post('staff_anni', TRUE)));
-        $gender            = trim($this->input->post('gender', TRUE));
-        $staff_dob         = struDate(trim($this->input->post('staff_dob', TRUE)));
-        $staff_access      = trim($this->input->post('staff_access', TRUE));
-        $staff_access      = ! empty($staff_access) ? $staff_access : '{}';
-        $staff_expe        = trim($this->input->post('staff_year', TRUE)) . ', ' . trim($this->input->post('staff_month', TRUE));
-        $servs             = "";
-
-        if (! empty($staff_serv)) {
-            foreach (json_decode($staff_serv) as $key => $serv) {
-                $servs .= $serv->value . ', ';
-            }
-        }
-        $staff_addr = trim($this->input->post('staff_addr', TRUE));
-        // $staff_serv = rtrim($servs, ", ");
-
-        $values = ['fld_uname' => $staff_name, 'fld_uphone' => $staff_phone, 'fld_uemail' => $staff_email, 'fld_udoj' => $staff_doj, 'fld_staff_designation' => $staff_designation, 'fld_uanniversary' => $staff_anni, 'fld_ugender' => $gender, 'fld_udob' => $staff_dob, 'fld_uexperience' => $staff_expe, 'fld_access' => $staff_access, 'fld_uaddress' => $staff_addr];
-
-        if (! empty($staff_id)) {
-            $values = array_merge($values, ['fld_uupdated_date' => CURDATE]);
-            logEntry('Update Staff', 'Staff', 'Staff Update successfully', 'Update', '');
-            $result = $this->Common_model->UpdateData('users', $values, ['fld_uid' => $staff_id]);
-        } else {
-            $prev_id  = $this->Common_model->PaginationData('users', 'fld_staffid', NULL, "`fld_uid` DESC", 1, 0);
-            $staff_id = 'WS1000';
-            if (! empty($prev_id)) {
-                $staff_id = 'WS' . ((float) substr($prev_id[0]['fld_staffid'], 2) + 1);
-            }
-
-            $pass   = $this->encryption->encrypt('staff@123');
-            $values = array_merge($values, ['fld_staffid' => $staff_id, 'fld_uphone' => $staff_phone, 'fld_upass' => $pass, 'fld_uroles' => 2]);
-
-            logEntry('Add Staff', 'Staff', 'Staff Added successfully', 'Add', '');
-            $result = $this->Common_model->InsertData('users', $values);
-        }
-
-        $response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
-        echo json_encode($response);
-    }
-
-    /* --------------- insert / edit Maintenance ---------------- */
-    public function add_maintenance() {
-        $mnt_court    = trim($this->input->post('mnt_court', TRUE));
-        $mnt_date     = date('Y-m-d', strtotime($this->input->post('mnt_date', TRUE)));
-        $mnt_frm_time = trim($this->input->post('mnt_frm_time', TRUE));
-        $mnt_end_time = trim($this->input->post('mnt_end_time', TRUE));
-        $mnt_reason   = trim($this->input->post('mnt_reason', TRUE));
-        $maintain_id  = $this->input->post('maintain_id', TRUE);
-        $getAdminId   = $this->session->userdata('login_info');
-
-        $startTime = new DateTime($mnt_frm_time);
-        $endTime   = new DateTime($mnt_end_time);
-
-        // Start time is greater than End time Condition
-        if ($startTime >= $endTime) {
-            echo json_encode([
-                'status'    => 400,
-                'alert_msg' => 'Start time must be earlier than end time.',
-            ]);
-            return;
-        }
-
-        // Start Time and End time is equal Condition
-        if ($startTime == $endTime) {
-            echo json_encode([
-                'status'    => 400,
-                'alert_msg' => 'Start time and end time cannot be the same.',
-            ]);
-            return;
-        }
-
-        $interval  = new DateInterval('PT30M');
-        $timeSlots = [];
-
-        while ($startTime <= $endTime) {
-            $timeSlots[] = $startTime->format('h:i A');
-            $startTime->add($interval);
-        }
-
-        $conflict = $this->Common_model->isTimeSlotBooked($mnt_court, $mnt_date, $timeSlots);
-
-        if ($conflict) {
-            echo json_encode([
-                'status'    => 400,
-                'alert_msg' => 'Selected time slot is already booked. Please choose another time.',
-            ]);
-            return;
-        }
-
-        $totalMinutes = count($timeSlots) * 30;
-
-        $values = [
-            'fld_aserv'   => $mnt_court,
-            'fld_adate'   => $mnt_date,
-            'fld_atime'   => json_encode($timeSlots),
-            'fld_acustid' => $getAdminId['uid'],
-            'fld_aduring' => $totalMinutes,
-            'fld_areason' => $mnt_reason,
-            'fld_atype'   => 'Maintenance',
-        ];
-
-        if (! empty($maintain_id)) {
-            $result = $this->Common_model->UpdateData('appointments', $values, ['md5(`fld_aid`)' => $maintain_id]);
-            logEntry('Update Maintenance', 'Court Maintenance', 'Court Maintenance Update successfully', 'Update', '');
-        } else {
-            $prev_id = $this->Common_model->PaginationData('appointments', 'fld_appointid', ['fld_atype' => 'Maintenance'], "`fld_aid` DESC", 1, 0);
-
-            $maintain_id = 'WM1000';
-            if (! empty($prev_id) && isset($prev_id[0]['fld_appointid'])) {
-                $prev_num    = (int) substr($prev_id[0]['fld_appointid'], 2);
-                $maintain_id = 'WM' . str_pad($prev_num + 1, 4, '0', STR_PAD_LEFT);
-            }
-
-            $values['fld_appointid'] = $maintain_id;
-            $app_lastid              = $this->Common_model->InsertData('appointments', $values);
-
-            $new_meta_data = [];
-            foreach ($timeSlots as $time) {
-                $new_meta_data[] = [
-                    'fld_amappid'      => $app_lastid,
-                    'fld_amstaff_time' => $time,
-                    'fld_amserv_name'  => $mnt_court,
-                    'fld_amserv_dura'  => 30,
-                    'fld_amserv_rate'  => '0.00',
-                    'fld_amstatus'     => 'Active',
-                ];
-            }
-
-            if (! empty($new_meta_data)) {
-                $result = $this->Common_model->InsertBatchData('appointment_meta', $new_meta_data);
-            }
-
-            logEntry('Add Maintenance', 'Court Maintenance', 'Court Maintenance Added successfully', 'Add', '');
-        }
-
-        $response = ($result > 0)
-        ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')]
-        : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
-
-        echo json_encode($response);
-    }
-
-    /* --------------- insert / edit leave ---------------- */
-    public function add_leave() {
-
-        $info      = checkLogin();
-        $lid       = trim($this->input->post('lid', TRUE));
-        $daterange = trim($this->input->post('leave_date', TRUE));
-        $reason    = trim($this->input->post('reason', TRUE));
-        $ids       = explode("|", $this->input->post('person', TRUE));
-        $apply_by  = $info['uid'];
-
-        if (! empty($ids[0])) {
-            $person    = $ids[0];
-            $staff_id  = $ids[1];
-            $splitdate = explode(" to ", $daterange);
-        }
-
-        $return = ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
-        if (! empty($lid)) {
-            /* ----- Update leave status like approved and rejected ----- */
-            $sts        = trim($this->input->post('sts', TRUE));
-            $rej_reason = "";
-
-            $prev_data      = $this->Common_model->GetDatas('leaves', '*', ['fld_lid' => $lid]); /* --- get leave date using both edit and update status --- */
-            $prev_daterange = $prev_data[0]['fld_ldate'];
-            $split          = explode(" to ", $prev_daterange);
-            $prev_days      = DateDiff($split[0], $split[1]);
-            $prev_staff_id  = $prev_data[0]['fld_lstaff_id'];
-
-            if (! empty($sts)) {
-
-                for ($u = 0; $u <= $prev_days; $u++) {
-                    $update_date = date('Y-m-d', strtotime(struDate($split[0]) . '+ ' . $u . ' day'));
-                    $value       = ['fld_saflag' => 'disabled'];
-                    if ($sts == 'Approved') {
-                        $value = ['fld_saflag' => ''];
-                    } else {
-                        $rej_reason = trim($this->input->post('rej_reason', TRUE));
-                    }
-
-                    $this->Common_model->UpdateData('staff_attendance', $value, ['fld_leaveid' => $lid, 'fld_sastaffid' => $prev_staff_id, 'fld_sadate' => $update_date]);
-                }
-
-                $updatedata = ($info['role'] == STAFF) ? ['fld_req_reject' => $rej_reason] : ['fld_lstatus' => $sts, 'fld_lrej_reason' => $rej_reason];
-
-            } else {
-
-                /* ----- Edit leave datas ----- */
-                $days = DateDiff($splitdate[0], $splitdate[1]);
-                for ($r = 0; $r <= $prev_days; $r++) {
-                    $prev_date = date('Y-m-d', strtotime(struDate($split[0]) . '+ ' . $r . ' day'));
-                    $this->Common_model->DeleteData('staff_attendance', ['fld_sadate' => $prev_date, 'fld_sastaffid' => $prev_staff_id]);
-                }
-
-                for ($n = 0; $n <= $days; $n++) {
-                    $new_date = date('Y-m-d', strtotime(struDate($splitdate[0]) . '+ ' . $n . ' day'));
-                    $new_day  = date('D', strtotime(struDate($splitdate[0]) . '+ ' . $n . ' day'));
-
-                    $flag              = ($info['role'] == ADMIN) ? '' : 'disabled';
-                    $newinsertdata[$n] = [
-                        'fld_sastaffid' => $staff_id,
-                        'fld_leaveid'   => $lid,
-                        'fld_sadate'    => $new_date,
-                        'fld_saday'     => $new_day,
-                        'fld_satitle'   => 'Leave',
-                        'fld_sastatus'  => 'L',
-                        'fld_saflag'    => $flag,
-                    ];
-                }
-                $this->Common_model->InsertBatchData('staff_attendance', $newinsertdata);
-                $updatedata = ['fld_ldate' => $daterange, 'fld_lperson' => $person, 'fld_lstaff_id' => $staff_id, 'fld_lreason' => $reason];
-            }
-
-            $result = $this->Common_model->UpdateData('leaves', $updatedata, ['fld_lid' => $lid]);
-
-        } else {
-
-            $leave_check = $this->Common_model->GetDatas('staff_attendance', 'fld_sadate', ['fld_sastaffid' => $staff_id, 'fld_sadate >=' => struDate($splitdate[0]), 'fld_sadate <=' => struDate($splitdate[1]), 'fld_saflag' => '']);
-            $result      = 0;
-            $return      = ['status' => 402, 'alert_msg' => ['word' => 'This staff have the leave date, Kindly apply other date(s)!!!']];
-
-            /* ----- Prevent the application of dates that have already been applied ----- */
-            if (empty($leave_check)) {
-
-                $lstatus = ($info['role'] == ADMIN) ? 'Approved' : 'Pending';
-                $last_id = $this->Common_model->InsertData('leaves', ['fld_ldate' => $daterange, 'fld_lperson' => $person, 'fld_lstaff_id' => $staff_id, 'fld_applied_by' => $apply_by, 'fld_lreason' => $reason, 'fld_lstatus' => $lstatus]);
-
-                /* ----- Insert leave data to leaves and attendance ----- */
-                $days       = DateDiff($splitdate[0], $splitdate[1]);
-                $insertdata = [];
-                for ($d = 0; $d <= $days; $d++) {
-                    $date = date('Y-m-d', strtotime(struDate($splitdate[0]) . '+ ' . $d . ' day'));
-                    $day  = date('D', strtotime(struDate($splitdate[0]) . '+ ' . $d . ' day'));
-
-                    $flag           = ($info['role'] == ADMIN) ? '' : 'disabled';
-                    $insertdata[$d] = [
-                        'fld_sastaffid' => $staff_id,
-                        'fld_leaveid'   => $last_id,
-                        'fld_sadate'    => $date,
-                        'fld_saday'     => $day,
-                        'fld_satitle'   => 'Leave',
-                        'fld_sastatus'  => 'L',
-                        'fld_saflag'    => $flag,
-                    ];
-                }
-                $result = $this->Common_model->InsertBatchData('staff_attendance', $insertdata);
-            }
-        }
-
-        $response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')] : $return;
-        echo json_encode($response);
-        exit;
-    }
-
-    public function add_booking() {
-        $appid = $this->input->post('app_id', TRUE);
-
-        /* customer detail */
-        $custname   = trim($this->input->post('cust_name', TRUE));
-        $custlname  = trim($this->input->post('cust_lname', TRUE));
-        $custphone  = trim($this->input->post('cust_phone', TRUE));
-        $custemail  = trim($this->input->post('cust_email', TRUE));
-        $custdob    = trim($this->input->post('cust_dob', TRUE));
-        $custgender = trim($this->input->post('cust_gender', TRUE));
-        $mari_sts   = trim($this->input->post('mari_sts', TRUE));
-        $anni_date  = trim($this->input->post('anni_date', TRUE));
-        $custaddr   = trim($this->input->post('cust_addr', TRUE));
-        $custpref   = trim($this->input->post('cust_pref', TRUE));
-
-        /* service detail*/
-        $admincourt = $this->input->post('admincourt', TRUE);
-        $court_dura = $this->input->post('court_dura', TRUE);
-        $court_rate = $this->input->post('court_rate', TRUE);
-        $court_date = $this->input->post('court_date', TRUE);
-        $timings    = $this->input->post('times', TRUE);
-
-        /* Coupon detail*/
-        $coupon_id      = $this->input->post('fld_acpid', TRUE);
-        $coupon_percent = $this->input->post('fld_acppercent', TRUE);
-        $coupon_amount  = $this->input->post('fld_acpamt', TRUE);
-
-        $gst_amount     = $this->input->post('getAmount', TRUE);
-        $payment_amount = $this->input->post('payment_amount', TRUE);
-
-        /* payment detail*/
-        $paymode = $this->input->post('pay_mode', TRUE);
-        $amount  = 0;
-        $cotp    = $this->input->post('cotp', TRUE);
-
-        $history = $paymode;
-        if (! empty($appid)) {
-
-            /* Check already have the slot, date, time */
-            $bookedtime = '';
-            for ($b = 0; $b < count($timings); $b++) {
-                $bookedtime .= "'" . $timings[$b] . "', ";
-            }
-
-            $prev_booking = $this->Common_model->GetJoinDatas('appointments A', 'appointment_meta AM', 'A.fld_aid = AM.fld_amappid', "`fld_adate`", "`fld_amstaff_time` IN ('" . trim($bookedtime, ", '") . "') AND `fld_adate` = '" . $court_date . "' AND `fld_aserv` = '" . $admincourt . "' AND `fld_astatus` != 'Cancelled'");
-            if (! empty($prev_booking)) {
-                echo json_encode(['status' => 300, 'alert_msg' => 'Sorry, but this slot is already booked!']);
-                exit;
-            }
-
-            $appoint_id = $this->input->post('appoint_id');
-
-            $check       = ExistorNot('customers', ['fld_phone' => $custphone]);
-            $cust_rec    = $this->Common_model->GetDatas('customers', 'fld_id, fld_custid', ['fld_id !=' => ''], "`fld_id` DESC");
-            $newduration = $newrate = 0;
-            for ($n = 0; $n < count($timings); $n++) {
-                /* --- For Appointment --- */
-                $newduration += (float) $court_dura[$admincourt];
-                $newrate += (float) $court_rate[$admincourt];
-            }
-            $this->Common_model->UpdateData('customers', [
-                'fld_name'     => $custname,
-                'fld_lastname' => $custlname,
-                'fld_email'    => $custemail,
-            ], ["fld_phone" => $custphone]);
-
-            $CustID = $this->input->post('cust_id', TRUE);
-
-            $past_bal = $this->Common_model->GetDatas('payments', 'fld_pbalance, fld_ppaid, fld_phistory', ['fld_appid' => $appid], "`fld_pid` DESC");
-            $balance  = 0;
-
-            if (! empty($past_bal)) {
-                $paid    = (float) $past_bal[0]['fld_ppaid'];
-                $history = json_decode($past_bal[0]['fld_phistory']) . $paymode;
-            }
-
-            $metavalue = [];
-            $duration  = $rate  = 0;
-            for ($u = 0; $u < count($timings); $u++) {
-
-                $duration += (float) $court_dura[$admincourt];
-                $rate += (float) $court_rate[$admincourt];
-
-                $metavalue[$u] = [
-                    'fld_amappid'      => $appid,
-                    'fld_amstaff_time' => $timings[$u],
-                    'fld_amserv_name'  => $admincourt,
-                    'fld_amserv_dura'  => $court_dura[$admincourt],
-                    'fld_amserv_rate'  => $court_rate[$admincourt],
-                    'fld_amstatus'     => 'Active',
-                ];
-            }
-            $discount = ($rate * ((float) $coupon_percent / 100));
-            $balance  = (($rate - $discount) - ((float) $amount + $paid));
-
-            $updatedata = [
-                'fld_adate'      => $court_date,
-                'fld_atime'      => json_encode($timings),
-                'fld_acustid'    => $CustID,
-                'fld_aserv'      => $admincourt,
-                'fld_aduring'    => $duration,
-                'fld_arate'      => $rate,
-                'fld_apaymode'   => $paymode,
-                'fld_abalance'   => $balance,
-                'fld_gst_amt'    => $gst_amount,
-                'fld_pay_charge' => $payment_amount,
-            ];
-
-            logEntry('Reschedule Appointment', 'Court Status', 'Reschedule Appointment successfully', 'Update', json_encode($timings));
-            $this->Common_model->UpdateData('appointments', $updatedata, ['fld_aid' => $appid]);
-            $this->Common_model->DeleteData('appointment_meta', ['fld_amappid' => $appid]);
-            $result = $this->Common_model->InsertBatchData('appointment_meta', array_reverse($metavalue));
-            $this->Common_model->UpdateData('payments', ['fld_prate' => $rate, 'fld_ppaid' => $amount, 'fld_pbalance' => $balance, 'fld_phistory' => json_encode($history)], ['fld_appid' => $appid]);
-            $tomail           = (! empty($check)) ? $check[0]['fld_email'] : $custemail;
-            $name             = (! empty($check)) ? $check[0]['fld_name'] : $custname;
-            $subject          = ':tada: Your Booking Has Been Rescheduled! :tada:';
-            $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' => $this->input->post('appoint_id'), 'court' => $admincourt, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => '', 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
-
-            $getPdf = $this->pdf_generate($this->input->post('appoint_id'));
-            $mail   = SendEmail($tomail, "", "", $subject, $bookingtemplates, $getPdf);
-            $this->Common_model->UpdateData('appointments', ['fld_conf_email' => $mail], ['fld_aid' => $appid]);
-
-        } else {
-
-            /* Check already have the slot, date, time */
-            $bookedtime = '';
-            for ($b = 0; $b < count($timings); $b++) {
-                $bookedtime .= "'" . $timings[$b] . "', ";
-            }
-
-            $prev_booking = $this->Common_model->GetJoinDatas('appointments A', 'appointment_meta AM', 'A.fld_aid = AM.fld_amappid', "`fld_adate`", "`fld_amstaff_time` IN ('" . trim($bookedtime, ", '") . "') AND `fld_adate` = '" . $court_date . "' AND `fld_aserv` = '" . $admincourt . "' AND `fld_astatus` != 'Cancelled'");
-            if (! empty($prev_booking)) {
-                echo json_encode(['status' => 300, 'alert_msg' => 'Sorry, but this slot is already booked!']);
-                exit;
-            }
-
-            $check       = ExistorNot('customers', ['fld_phone' => $custphone]);
-            $cust_rec    = $this->Common_model->GetDatas('customers', 'fld_id, fld_custid', ['fld_id !=' => ''], "`fld_id` DESC");
-            $appoint_rec = $this->Common_model->GetDatas('appointments', 'fld_aid, fld_appointid', ['fld_aid !=' => '', 'fld_atype IS NULL' => NULL], "`fld_aid` DESC");
-
-            $CustID = 'WC1000';
-            if (! empty($cust_rec)) {
-                $CustID = 'WC' . ((float) substr($cust_rec[0]['fld_custid'], 2) + 1);
-            }
-
-            $AppointID = 'WB1000';
-            if (! empty($appoint_rec)) {
-                $AppointID = 'WB' . ((float) substr($appoint_rec[0]['fld_appointid'], 2) + 1);
-            }
-
-            if (empty($check)) {
-                $cust_lastid = $this->Common_model->InsertData('customers', [
-                    'fld_custid'   => $CustID,
-                    'fld_name'     => $custname,
-                    'fld_lastname' => $custlname,
-                    'fld_phone'    => $custphone,
-                    'fld_email'    => $custemail,
-                    'fld_pass'     => $this->encryption->encrypt('user@123'),
-                    'fld_type'     => 'Direct',
-                ]);
-            } else {
-                $CustID      = $check[0]['fld_custid'];
-                $cust_lastid = $check[0]['fld_id'];
-            }
-
-            $newduration = $newrate = 0;
-            for ($n = 0; $n < count($timings); $n++) {
-                /* --- For Appointment --- */
-                $newduration += (float) $court_dura[$admincourt];
-                $newrate += (float) $court_rate[$admincourt];
-            }
-            $discount     = ($newrate * ((float) $coupon_percent / 100));
-            $newbalance   = (($newrate - $discount) - (float) $amount);
-            $status       = ($paymode == 'Online') ? 'Pending' : 'Confirmed';
-            $new_app_data = [
-                'fld_appointid ' => $AppointID,
-                'fld_adate'      => $court_date,
-                'fld_atime'      => json_encode($timings),
-                'fld_acustid'    => $cust_lastid,
-                'fld_aserv'      => $admincourt,
-                'fld_aduring'    => $newduration,
-                'fld_arate'      => $newrate,
-                'fld_astatus'    => $status,
-                'fld_apaymode'   => $paymode,
-                'fld_apaystatus' => '',
-                'fld_abalance'   => $newbalance,
-                'fld_acpid'      => $coupon_id,
-                'fld_acppercent' => $coupon_percent,
-                'fld_acpamt'     => $coupon_amount,
-                'fld_gst_amt'    => $gst_amount,
-                'fld_pay_charge' => $payment_amount,
-            ];
-
-            $app_lastid = $this->Common_model->InsertData('appointments', $new_app_data);
-
-            for ($a = 0; $a < count($timings); $a++) {
-                /* --- For Appointment Meta --- */
-                $new_meta_data[$a] = [
-                    'fld_amappid '     => $app_lastid,
-                    'fld_amstaff_time' => $timings[$a],
-                    'fld_amserv_name'  => $admincourt,
-                    'fld_amserv_dura'  => $court_dura[$admincourt],
-                    'fld_amserv_rate'  => $court_rate[$admincourt],
-                    'fld_amstatus'     => 'Active',
-                ];
-            }
 
+		    $result = $this->Common_model->InsertData('customers', $values);
+		}
+
+		$response = ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
+
+		if ($result > 0) {
+		    $response = ['status' => 200, 'alert_msg' => alertMsg('add_suc')];
+		}
+
+		echo json_encode($response);
+	}
+
+
+	/* --------------- insert / edit service ----------------- */
+	public function add_service() {
+		$sid 	   = trim($this->input->post('sid', TRUE));
+		$cate 	   = trim($this->input->post('cate', TRUE));
+		$serv_name = trim($this->input->post('serv_name', TRUE));
+		$duration = trim($this->input->post('serv_duration', TRUE));
+		$split_duration = explode(":", $duration);
+		$serv_dura = (($split_duration[0] * 60) + $split_duration[1]);
+		$serv_rate = trim($this->input->post('serv_rate', TRUE));
+		$serv_type = trim($this->input->post('serv_type', TRUE));
+		$serv_desc = trim($this->input->post('serv_desc', TRUE));
+
+
+		$values = ['fld_scate' => $cate, 'fld_sname' => $serv_name, 'fld_sduration' => $serv_dura, 'fld_srate' => $serv_rate, 'fld_stype' => $serv_type, 'fld_sdesc' => $serv_desc];
+
+		if(!empty($sid)) {
+			$result = $this->Common_model->UpdateData('services', $values, ['fld_sid' => $sid]);
+		} else {
+			$result = $this->Common_model->InsertData('services', $values); 
+		}
+
+		$response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
+		echo json_encode($response);
+	}
+
+
+	/* --------------- insert / edit staff ---------------- */
+	public function add_staff() {
+		$staff_id 	   		= trim($this->input->post('staff_id', TRUE));
+		$staff_name  		= trim(ucfirst($this->input->post('staff_name', TRUE)));
+		$staff_phone 		= trim($this->input->post('staff_phone', TRUE));
+		$staff_email 		= trim($this->input->post('staff_email', TRUE));
+		$staff_doj 			= struDate(trim($this->input->post('staff_doj', TRUE)));
+		$staff_designation  = trim($this->input->post('staff_designation', TRUE));
+		$staff_anni 		= struDate(trim($this->input->post('staff_anni', TRUE)));
+		$gender 			= trim($this->input->post('gender', TRUE));
+		$staff_dob 			= struDate(trim($this->input->post('staff_dob', TRUE)));
+		$staff_access 		= trim($this->input->post('staff_access', TRUE));
+		$staff_access       = !empty($staff_access) ? $staff_access : '{}';
+		$staff_expe 		= trim($this->input->post('staff_year', TRUE)).', '.trim($this->input->post('staff_month', TRUE));
+		$servs = "";
+
+		if(!empty($staff_serv)) {
+			foreach(json_decode($staff_serv) as $key => $serv) {
+				$servs .= $serv->value.', ';
+			}
+		}
+		$staff_addr 		= trim($this->input->post('staff_addr', TRUE));
+		// $staff_serv = rtrim($servs, ", ");
+
+		$values = ['fld_uname' => $staff_name, 'fld_uphone'=>$staff_phone, 'fld_uemail' => $staff_email, 'fld_udoj' => $staff_doj, 'fld_staff_designation' => $staff_designation, 'fld_uanniversary' => $staff_anni, 'fld_ugender' => $gender, 'fld_udob' => $staff_dob, 'fld_uexperience' => $staff_expe, 'fld_access' => $staff_access, 'fld_uaddress' => $staff_addr];
+
+        
+		if(!empty($staff_id)) {
+			$values = array_merge($values, ['fld_uupdated_date' => CURDATE]);
+			logEntry('Update Staff', 'Staff', 'Staff Update successfully', 'Update', '');
+			$result = $this->Common_model->UpdateData('users', $values, ['fld_uid' => $staff_id]);
+		} else {
+			$prev_id = $this->Common_model->PaginationData('users', 'fld_staffid', NULL, "`fld_uid` DESC", 1, 0);
+			$staff_id = 'WS1000';
+			if(!empty($prev_id)) {
+				$staff_id = 'WS'.((float)substr($prev_id[0]['fld_staffid'], 2) + 1);
+			}
+
+			$pass = $this->encryption->encrypt('staff@123');
+			$values = array_merge($values, ['fld_staffid' => $staff_id, 'fld_uphone' => $staff_phone, 'fld_upass' => $pass, 'fld_uroles' => 2]);
+
+			logEntry('Add Staff', 'Staff', 'Staff Added successfully', 'Add', '');
+			$result = $this->Common_model->InsertData('users', $values); 
+		}
+
+		$response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
+		echo json_encode($response);
+	}
+
+
+	/* --------------- insert / edit Maintenance ---------------- */
+	public function add_maintenance() 
+	{
+	    $mnt_court     = trim($this->input->post('mnt_court', TRUE));
+	    $mnt_date      = date('Y-m-d', strtotime($this->input->post('mnt_date', TRUE))); 
+	    $mnt_frm_time  = trim($this->input->post('mnt_frm_time', TRUE));
+	    $mnt_end_time  = trim($this->input->post('mnt_end_time', TRUE));
+	    $mnt_reason    = trim($this->input->post('mnt_reason', TRUE));
+	    $maintain_id      = $this->input->post('maintain_id', TRUE); 
+	    $getAdminId    = $this->session->userdata('login_info');
+
+	    $startTime = new DateTime($mnt_frm_time);
+	    $endTime   = new DateTime($mnt_end_time);
+	    $interval  = new DateInterval('PT30M');
+	    $timeSlots = [];
+
+	    while ($startTime <= $endTime) {
+	        $timeSlots[] = $startTime->format('h:i A');
+	        $startTime->add($interval); 
+	    }
+
+	    $conflict = $this->Common_model->isTimeSlotBooked($mnt_court, $mnt_date, $timeSlots);
+
+	    if ($conflict) {
+	        echo json_encode([
+	            'status' => 400,
+	            'alert_msg' => 'Selected time slot is already booked. Please choose another time.'
+	        ]);
+	        return;
+	    }
+
+	    $totalMinutes = count($timeSlots) * 30;
+
+	    $values = [
+	        'fld_aserv'  => $mnt_court,
+	        'fld_adate'  => $mnt_date,
+	        'fld_atime'  => json_encode($timeSlots), 
+	        'fld_acustid' => $getAdminId['uid'],
+	        'fld_aduring' => $totalMinutes,
+	        'fld_areason' => $mnt_reason,
+	        'fld_atype'  => 'Maintenance'
+	    ];
+
+	    if (!empty($maintain_id)) { 
+	        $result = $this->Common_model->UpdateData('appointments', $values, ['md5(`fld_aid`)' => $maintain_id]);
+	        logEntry('Update Maintenance', 'Court Maintenance', 'Court Maintenance Update successfully', 'Update', '');
+	    } else {
+	        $prev_id = $this->Common_model->PaginationData('appointments', 'fld_appointid', ['fld_atype' => 'Maintenance'], "`fld_aid` DESC", 1, 0);
+	        
+	        $maintain_id = 'WM1000';
+	        if (!empty($prev_id) && isset($prev_id[0]['fld_appointid'])) {
+	            $prev_num = (int) substr($prev_id[0]['fld_appointid'], 2);
+	            $maintain_id = 'WM' . str_pad($prev_num + 1, 4, '0', STR_PAD_LEFT);
+	        }
+	        
+	        $values['fld_appointid'] = $maintain_id; 
+	        $app_lastid  = $this->Common_model->InsertData('appointments', $values);
+
+	        $new_meta_data = [];
+	        foreach ($timeSlots as $time) {
+	            $new_meta_data[] = [
+	                'fld_amappid'      => $app_lastid,
+	                'fld_amstaff_time' => $time,
+	                'fld_amserv_name'  => $mnt_court,
+	                'fld_amserv_dura'  => 30, 
+	                'fld_amserv_rate'  => '0.00',
+	                'fld_amstatus'     => 'Active',
+	            ];
+	        }
+
+	        if (!empty($new_meta_data)) {
+	            $result = $this->Common_model->InsertBatchData('appointment_meta', $new_meta_data);
+	        }
+
+	        logEntry('Add Maintenance', 'Court Maintenance', 'Court Maintenance Added successfully', 'Add', '');
+	    }
+
+	    $response = ($result > 0) 
+	        ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')] 
+	        : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
+
+	    echo json_encode($response);
+	}
+
+	/* --------------- insert / edit leave ---------------- */
+	public function add_leave() {
+
+		$info = checkLogin();
+		$lid = trim($this->input->post('lid', TRUE));
+		$daterange = trim($this->input->post('leave_date', TRUE));
+		$reason = trim($this->input->post('reason', TRUE));
+		$ids = explode("|", $this->input->post('person', TRUE));
+		$apply_by = $info['uid'];
+
+		if(!empty($ids[0])) {
+			$person = $ids[0];
+			$staff_id = $ids[1];
+			$splitdate = explode(" to ", $daterange);
+		}		
+		
+		$return = ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
+		if(!empty($lid)) {
+			/* ----- Update leave status like approved and rejected ----- */
+			$sts = trim($this->input->post('sts', TRUE));
+			$rej_reason = "";
+
+			$prev_data = $this->Common_model->GetDatas('leaves', '*', [ 'fld_lid' => $lid ]); /* --- get leave date using both edit and update status --- */
+			$prev_daterange = $prev_data[0]['fld_ldate'];
+			$split = explode(" to ", $prev_daterange);
+			$prev_days = DateDiff($split[0], $split[1]);
+			$prev_staff_id = $prev_data[0]['fld_lstaff_id'];
+
+
+			if(!empty($sts)) {
+
+				for($u = 0; $u <= $prev_days; $u++) {
+					$update_date = date('Y-m-d', strtotime(struDate($split[0]). '+ '.$u.' day'));
+					$value = ['fld_saflag' => 'disabled'];
+					if($sts == 'Approved') {
+						$value = ['fld_saflag' => ''];
+					} else {
+						$rej_reason = trim($this->input->post('rej_reason', TRUE));
+					}
+
+					$this->Common_model->UpdateData('staff_attendance', $value, ['fld_leaveid'=> $lid, 'fld_sastaffid' => $prev_staff_id, 'fld_sadate' => $update_date]);
+				}
+
+				$updatedata = ($info['role'] == STAFF) ? ['fld_req_reject' => $rej_reason] : ['fld_lstatus' => $sts, 'fld_lrej_reason' => $rej_reason];
+
+			} else {
+
+				/* ----- Edit leave datas ----- */
+				$days = DateDiff($splitdate[0], $splitdate[1]);
+				for($r = 0; $r <= $prev_days; $r++) {
+					$prev_date = date('Y-m-d', strtotime(struDate($split[0]). '+ '.$r.' day'));
+					$this->Common_model->DeleteData('staff_attendance', ['fld_sadate' => $prev_date, 'fld_sastaffid' => $prev_staff_id]);
+				}
+
+				for($n = 0; $n <= $days; $n++) {
+					$new_date = date('Y-m-d', strtotime(struDate($splitdate[0]). '+ '.$n.' day'));
+					$new_day = date('D', strtotime(struDate($splitdate[0]). '+ '.$n.' day'));
+
+					$flag = ($info['role'] == ADMIN) ? '' : 'disabled';
+					$newinsertdata[$n] = [
+						'fld_sastaffid' => $staff_id,
+						'fld_leaveid' => $lid,
+						'fld_sadate' => $new_date,
+						'fld_saday' => $new_day,
+						'fld_satitle' => 'Leave',
+						'fld_sastatus' => 'L',
+						'fld_saflag' => $flag
+					];
+				}
+				$this->Common_model->InsertBatchData('staff_attendance', $newinsertdata);
+				$updatedata = ['fld_ldate' => $daterange, 'fld_lperson' => $person, 'fld_lstaff_id' => $staff_id, 'fld_lreason' => $reason];
+			}
+
+			$result = $this->Common_model->UpdateData('leaves', $updatedata, ['fld_lid' => $lid] );
+
+		} else {
+
+			$leave_check = $this->Common_model->GetDatas('staff_attendance', 'fld_sadate', ['fld_sastaffid' => $staff_id, 'fld_sadate >=' => struDate($splitdate[0]), 'fld_sadate <=' => struDate($splitdate[1]), 'fld_saflag' => '']);
+			$result = 0;
+			$return = ['status' => 402, 'alert_msg' => ['word' => 'This staff have the leave date, Kindly apply other date(s)!!!']];
+
+			/* ----- Prevent the application of dates that have already been applied ----- */
+			if(empty($leave_check)) {
+
+				$lstatus = ($info['role'] == ADMIN) ? 'Approved' : 'Pending';
+				$last_id = $this->Common_model->InsertData('leaves', ['fld_ldate' => $daterange, 'fld_lperson' => $person, 'fld_lstaff_id' => $staff_id, 'fld_applied_by' => $apply_by, 'fld_lreason' => $reason, 'fld_lstatus' => $lstatus]);
+
+				/* ----- Insert leave data to leaves and attendance ----- */
+				$days = DateDiff($splitdate[0], $splitdate[1]);
+				$insertdata = [];
+				for ($d=0; $d <= $days; $d++) { 
+					$date = date('Y-m-d', strtotime(struDate($splitdate[0]). '+ '.$d.' day'));
+					$day = date('D', strtotime(struDate($splitdate[0]). '+ '.$d.' day'));
+
+					$flag = ($info['role'] == ADMIN) ? '' : 'disabled';
+					$insertdata[$d] = [
+						'fld_sastaffid' => $staff_id,
+						'fld_leaveid' => $last_id,
+						'fld_sadate' => $date,
+						'fld_saday' => $day,
+						'fld_satitle' => 'Leave',
+						'fld_sastatus' => 'L',
+						'fld_saflag' => $flag
+					];
+				}
+				$result = $this->Common_model->InsertBatchData('staff_attendance', $insertdata);
+			}
+		}
+
+		$response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')] : $return;
+		echo json_encode($response);
+		exit;
+	}
+
+
+	public function add_booking() {
+		$appid = $this->input->post('app_id', TRUE);
+		
+		/* customer detail */
+		$custname 	= trim($this->input->post('cust_name', TRUE));
+		$custlname 	= trim($this->input->post('cust_lname', TRUE));
+		$custphone 	= trim($this->input->post('cust_phone', TRUE));
+		$custemail 	= trim($this->input->post('cust_email', TRUE));
+		$custdob 	= trim($this->input->post('cust_dob', TRUE));
+		$custgender = trim($this->input->post('cust_gender', TRUE));
+		$mari_sts 	= trim($this->input->post('mari_sts', TRUE));
+		$anni_date 	= trim($this->input->post('anni_date', TRUE));
+		$custaddr 	= trim($this->input->post('cust_addr', TRUE));
+		$custpref 	= trim($this->input->post('cust_pref', TRUE));
+
+		/* service detail*/
+		$admincourt 	= $this->input->post('admincourt', TRUE);
+		$court_dura 	= $this->input->post('court_dura', TRUE);
+		$court_rate 	= $this->input->post('court_rate', TRUE);
+		$court_date 	= $this->input->post('court_date', TRUE);
+		$timings 	= $this->input->post('times', TRUE);
+
+		/* Coupon detail*/
+		$coupon_id = $this->input->post('fld_acpid', TRUE);
+		$coupon_percent = $this->input->post('fld_acppercent', TRUE);
+		$coupon_amount = $this->input->post('fld_acpamt', TRUE);
+
+		$gst_amount = $this->input->post('getAmount', TRUE);
+		$payment_amount = $this->input->post('payment_amount', TRUE);
+
+		/* payment detail*/
+		$paymode 	= $this->input->post('pay_mode', TRUE);
+		$amount 	= 0;
+		$cotp 		= $this->input->post('cotp', TRUE);
+
+		$history = $paymode;
+		if (!empty($appid)) {
+
+			$AppointID = $this->input->post('appoint_id');
+			/* Check already have the slot, date, time */
+			$bookedtime = '';
+			for($b = 0; $b < count($timings); $b++) {
+			  $bookedtime .= "'".$timings[$b]."', ";
+			}
+	  
+			$prev_booking = $this->Common_model->GetJoinDatas('appointments A', 'appointment_meta AM', 'A.fld_aid = AM.fld_amappid', "`fld_adate`", "`fld_amstaff_time` IN ('".trim($bookedtime, ", '")."') AND `fld_adate` = '".$court_date."' AND `fld_aserv` = '".$admincourt."' AND `fld_astatus` != 'Cancelled'");
+			if(!empty($prev_booking)) {
+			  echo json_encode(['status' => 300, 'alert_msg' => 'Sorry, but this slot is already booked!']);
+			  exit;
+			}
+			
+            $check = ExistorNot('customers', ['fld_phone' => $custphone]);
+			$cust_rec = $this->Common_model->GetDatas('customers', 'fld_id, fld_custid', ['fld_id !=' => ''], "`fld_id` DESC");
+			$newduration = $newrate = 0;
+			for($n = 0; $n < count($timings); $n++) {
+				/* --- For Appointment --- */
+				$newduration += (float)$court_dura[$admincourt];
+				$newrate += (float)$court_rate[$admincourt];
+			}
+			$this->Common_model->UpdateData('customers', [
+				'fld_name' => $custname,
+				'fld_lastname' => $custlname,
+				'fld_email' => $custemail,
+			], ["fld_phone" => $custphone]);
+
+			$CustID = $this->input->post('cust_id', TRUE);
+
+			$past_bal = $this->Common_model->GetDatas('payments', 'fld_pbalance, fld_ppaid, fld_phistory', ['fld_appid' => $appid], "`fld_pid` DESC");
+			$balance = 0;
+			
+			if(!empty($past_bal)) {
+				$paid = (float)$past_bal[0]['fld_ppaid'];
+				$history = json_decode($past_bal[0]['fld_phistory']).$paymode;
+			}
+
+			$metavalue = [];
+			$duration = $rate = 0;
+			for($u = 0; $u < count($timings); $u++) {
+
+				$duration += (float)$court_dura[$admincourt];
+				$rate += (float)$court_rate[$admincourt];
+				
+				$metavalue[$u] = [
+					'fld_amappid' => $appid,
+					'fld_amstaff_time' => $timings[$u],
+					'fld_amserv_name' => $admincourt,
+					'fld_amserv_dura' => $court_dura[$admincourt],
+					'fld_amserv_rate' => $court_rate[$admincourt],
+					'fld_amstatus' => 'Active',
+				];
+			}
+			$discount = ($rate * ((float)$coupon_percent / 100));
+			$balance = (($rate - $discount)- ((float)$amount + $paid));
+
+			$updatedata = [
+					'fld_adate' => $court_date,
+					'fld_atime' => json_encode($timings),
+					'fld_acustid' => $CustID,
+					'fld_aserv' => $admincourt,
+					'fld_aduring' => $duration,
+					'fld_arate' => $rate,
+					'fld_abalance' => $balance,
+					'fld_gst_amt' => $gst_amount,
+					'fld_pay_charge' => $payment_amount,
+				];
+
+			logEntry('Reschedule Appointment', 'Court Status', 'Reschedule Appointment successfully', 'Update', json_encode($timings));
+			$this->Common_model->UpdateData('appointments', $updatedata, ['fld_aid' => $appid]);
+			$this->Common_model->DeleteData('appointment_meta', ['fld_amappid' => $appid]);
+			$result  = $this->Common_model->InsertBatchData('appointment_meta', array_reverse($metavalue));
+			$this->Common_model->UpdateData('payments', ['fld_prate' => $rate, 'fld_ppaid' => $amount, 'fld_pbalance' => $balance, 'fld_phistory' => json_encode($history)], ['fld_appid' => $appid]);
+            
+			$tomail = (!empty($check)) ? $check[0]['fld_email'] : $custemail;
+			$name = (!empty($check)) ? $check[0]['fld_name'] : $custname;
+			$paymode = $this->Common_model->GetDatas('appointments', "fld_apaymode", ['fld_appointid' => $AppointID]);
+            $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $AppointID, 'payment_method' => $paymode[0]['fld_apaymode'], 'court' => $admincourt, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => '', 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
+            
+			$getPdf = $this->pdf_generate($AppointID);
+			$mail = SendEmail($tomail, "", "", '🎉 Your Booking Has Been Rescheduled! 🎉', $bookingtemplates, $getPdf);
+			$this->Common_model->UpdateData('appointments', ['fld_conf_email' => $mail], ['fld_aid' => $appid]);
+		    
+		} else {
+
+			/* Check already have the slot, date, time */
+			$bookedtime = '';
+			for($b = 0; $b < count($timings); $b++) {
+			  $bookedtime .= "'".$timings[$b]."', ";
+			}
+	  
+			$prev_booking = $this->Common_model->GetJoinDatas('appointments A', 'appointment_meta AM', 'A.fld_aid = AM.fld_amappid', "`fld_adate`", "`fld_amstaff_time` IN ('".trim($bookedtime, ", '")."') AND `fld_adate` = '".$court_date."' AND `fld_aserv` = '".$admincourt."' AND `fld_astatus` != 'Cancelled'");
+			if(!empty($prev_booking)) {
+			  echo json_encode(['status' => 300, 'alert_msg' => 'Sorry, but this slot is already booked!']);
+			  exit;
+			}
+
+			$check = ExistorNot('customers', ['fld_phone' => $custphone]);
+			$cust_rec = $this->Common_model->GetDatas('customers', 'fld_id, fld_custid', ['fld_id !=' => ''], "`fld_id` DESC");
+			$appoint_rec = $this->Common_model->GetDatas('appointments', 'fld_aid, fld_appointid', ['fld_aid !=' => '', 'fld_atype IS NULL' => NULL], "`fld_aid` DESC");
+
+			$CustID = 'WC1000';
+			if(!empty($cust_rec)) {
+				$CustID = 'WC'.((float)substr($cust_rec[0]['fld_custid'], 2) + 1);
+			}
+
+			$AppointID = 'WB1000';
+			if(!empty($appoint_rec)) {
+				$AppointID = 'WB'.((float)substr($appoint_rec[0]['fld_appointid'], 2) + 1);
+			}
+
+			if(empty($check)) {
+				$cust_lastid = $this->Common_model->InsertData('customers', [
+					'fld_custid' => $CustID,
+					'fld_name' => $custname,
+					'fld_lastname' => $custlname,
+					'fld_phone' => $custphone,
+					'fld_email' => $custemail,
+					'fld_pass' => $this->encryption->encrypt('user@123'),
+					'fld_type' => 'Direct',
+				]);
+			} else {
+				$CustID = $check[0]['fld_custid'];
+				$cust_lastid = $check[0]['fld_id'];
+			}
+
+			$newduration = $newrate = 0;
+			for($n = 0; $n < count($timings); $n++) {
+				/* --- For Appointment --- */
+				$newduration += (float)$court_dura[$admincourt];
+				$newrate += (float)$court_rate[$admincourt];
+			}
+			$discount = ($newrate * ((float)$coupon_percent / 100));
+			$newbalance = (($newrate - $discount) - (float)$amount);
+            $status = ($paymode == 'Online') ? 'Pending' : 'Confirmed';
+			$new_app_data = [
+					'fld_appointid ' => $AppointID,
+					'fld_adate' => $court_date,
+					'fld_atime' => json_encode($timings),
+					'fld_acustid' => $cust_lastid,
+					'fld_aserv' => $admincourt,
+					'fld_aduring' => $newduration,
+					'fld_arate' =>  $newrate,
+					'fld_astatus' => $status,
+					'fld_apaymode' => $paymode,
+					'fld_apaystatus' => '',
+					'fld_abalance' => $newbalance,
+					'fld_acpid' => $coupon_id,
+					'fld_acppercent' => $coupon_percent,
+					'fld_acpamt' => $coupon_amount,
+					'fld_gst_amt' => $gst_amount,
+					'fld_pay_charge' => $payment_amount,
+				];
+
+			$app_lastid  = $this->Common_model->InsertData('appointments', $new_app_data);
+
+			for($a = 0; $a < count($timings); $a++) {
+				/* --- For Appointment Meta --- */
+				$new_meta_data[$a] = [
+					'fld_amappid ' => $app_lastid,
+					'fld_amstaff_time' => $timings[$a],
+					'fld_amserv_name' => $admincourt,
+					'fld_amserv_dura' => $court_dura[$admincourt],
+					'fld_amserv_rate' => $court_rate[$admincourt],
+					'fld_amstatus' => 'Active',
+				];
+			}
+            
             logEntry('Appointment Booking', 'Court Status', 'Appointment Booking successfully', 'Add', json_encode($timings));
-            $result = $this->Common_model->InsertBatchData('appointment_meta', array_reverse($new_meta_data));
-            $this->Common_model->InsertData('payments', ['fld_appid' => $app_lastid, 'fld_prate' => $newrate, 'fld_ppaid' => $amount, 'fld_pbalance' => $newbalance, 'fld_phistory' => json_encode($history)]);
+			$result = $this->Common_model->InsertBatchData('appointment_meta', array_reverse($new_meta_data));
+			$this->Common_model->InsertData('payments', [ 'fld_appid' => $app_lastid, 'fld_prate' => $newrate, 'fld_ppaid' => $amount, 'fld_pbalance' => $newbalance, 'fld_phistory' => json_encode($history)]);
 
-            $prev_used_cnt = $this->Common_model->GetDatas('coupons', 'fld_cpused', ['fld_cpid' => $coupon_id]);
-            $cp_cnt        = 1;
-            if (! empty($prev_used_cnt)) {$cp_cnt = ((int) $prev_used_cnt[0]['fld_cpused'] + 1);}
-            $this->Common_model->UpdateData('coupons', ['fld_cpused' => $cp_cnt], ['fld_cpid' => $coupon_id]);
-        }
+			$prev_used_cnt = $this->Common_model->GetDatas('coupons', 'fld_cpused', ['fld_cpid' => $coupon_id]);
+			$cp_cnt = 1;
+			if(!empty($prev_used_cnt)) { $cp_cnt = ((int)$prev_used_cnt[0]['fld_cpused'] + 1); }
+			$this->Common_model->UpdateData('coupons', ['fld_cpused' => $cp_cnt], ['fld_cpid' => $coupon_id]);
+		}
 
-        $response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc'), 'appoint_id' => $AppointID] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
-        echo json_encode($response);
-        exit;
-    }
-    public function update_cust_booking() {
+		$response = ($result > 0) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc'), 'appoint_id' => $AppointID] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
+		echo json_encode($response);
+		exit;
+	}
+	public function update_cust_booking() {
+    
+		$info = checkLogin();
+		// Razorpay Status
+		$appoint_id = $this->input->post('appoint_id', TRUE);
+		$payment_id = $this->input->post('pay_id', TRUE);
+		$order_id = $this->input->post('ord_id', TRUE);
+		$signature = $this->input->post('signature', TRUE);
+		$paydata = $this->input->post('paymentdata', TRUE);
+		
+		$razorstatus = $paydata['status'];
+		$paystatus = 'Paid';
+		$status = "Confirmed";
+		if(!empty($paydata)) {
+			if($razorstatus == "created" || $razorstatus == "authorized" || $razorstatus == "pending") {
+				$paystatus = $status = "Pending";
+			} elseif($razorstatus == "Failed" || $razorstatus == "failed" || $razorstatus == "cancelled") {
+				$paystatus = $status = "Cancelled";
+			} elseif($razorstatus == "refunded") {
+				$paystatus = $status = "Refunded";
+			}
+		}
 
-        $info = checkLogin();
-        // Razorpay Status
-        $appoint_id = $this->input->post('appoint_id', TRUE);
-        $payment_id = $this->input->post('pay_id', TRUE);
-        $order_id   = $this->input->post('ord_id', TRUE);
-        $signature  = $this->input->post('signature', TRUE);
-        $paydata    = $this->input->post('paymentdata', TRUE);
+		$result = 0;
+		$app_detail = $this->Common_model->GetJoinDatas('appointments A', 'customers C', 'A.fld_acustid = C.fld_id', '`fld_aid`, `fld_appointid`, `fld_name`, `fld_email`, `fld_phone`, `fld_aserv`, `fld_adate`, `fld_atime`, `fld_arate`, `fld_acpamt`', ['fld_appointid' => $appoint_id]);
+		if(!empty($app_detail)) {
+			$balance = ((float)$app_detail[0]['fld_arate'] - (float)$paydata['amount']);
+			$this->Common_model->UpdateData('appointments', ['fld_astatus' => $status, 'fld_payment_id' => $payment_id, 'fld_order_id' => $order_id, 'fld_signature' => $signature, 'fld_apaystatus' => $paydata['status'], 'fld_abalance' => $balance], ['fld_appointid' => $appoint_id]);
+			$this->Common_model->UpdateData('payments', ['fld_ppaid' => $paydata['amount'], 'fld_pbalance' => $balance, 'fld_pstatus' => $paystatus, 'fld_ppayid' => $payment_id, 'fld_pvpa' => $paydata['vpa'], 'fld_pemail' => $paydata['email'], 'fld_pcont' => $paydata['contact'], 'fld_pcreated_at' => $paydata['created_at'], 'fld_pamt' => $paydata['amount']], ['fld_appid' => $app_detail[0]['fld_aid']]);
+		
+			// Sending Email
+			$tomail = (!empty($app_detail)) ? $app_detail[0]['fld_email'] : $info['email_id'];
+			$name = (!empty($app_detail)) ? $app_detail[0]['fld_name'] : $info['uname'];
+			$subject = '🎉 Your Booking is Confirmed! Thank You for Booking with Us! 🎉';
+			$court = $app_detail[0]['fld_aserv'];
+			$court_date = $app_detail[0]['fld_adate'];
+			$timings = json_decode($app_detail[0]['fld_atime']);
+			$newrate = $app_detail[0]['fld_arate'];
+			$coupon_amount = $app_detail[0]['fld_acpamt'];
+			$gst_amount = 0;
+			$payment_amount = $app_detail[0]['fld_arate'];
+		
+			$bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $appoint_id, 'payment_method' => 'Online', 'court' => $court, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => $coupon_amount, 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
+		
+			$Pdf = $this->pdf_generate($appoint_id);
+			$mail = SendEmail($tomail, "", "", $subject, $bookingtemplates, $Pdf);
+			$result = $this->Common_model->UpdateData('appointments', ['fld_conf_email' => $mail], ['fld_appointid' => $appoint_id]);	
+		}
 
-        $razorstatus = $paydata['status'];
-        $paystatus   = 'Paid';
-        $status      = "Confirmed";
-        if (! empty($paydata)) {
-            if ($razorstatus == "created" || $razorstatus == "authorized" || $razorstatus == "pending") {
-                $paystatus = $status = "Pending";
-            } elseif ($razorstatus == "Failed" || $razorstatus == "failed" || $razorstatus == "cancelled") {
-                $paystatus = $status = "Cancelled";
-            } elseif ($razorstatus == "refunded") {
-                $paystatus = $status = "Refunded";
-            }
-        }
+		$response = (!empty($result)) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
+		echo json_encode($response);
+		exit;
+	  }
 
-        $result     = 0;
-        $app_detail = $this->Common_model->GetJoinDatas('appointments A', 'customers C', 'A.fld_acustid = C.fld_id', '`fld_aid`, `fld_appointid`, `fld_name`, `fld_email`, `fld_phone`, `fld_aserv`, `fld_adate`, `fld_atime`, `fld_arate`, `fld_acpamt`', ['fld_appointid' => $appoint_id]);
-        if (! empty($app_detail)) {
-            $balance = ((float) $app_detail[0]['fld_arate'] - (float) $paydata['amount']);
-            $this->Common_model->UpdateData('appointments', ['fld_astatus' => $status, 'fld_payment_id' => $payment_id, 'fld_order_id' => $order_id, 'fld_signature' => $signature, 'fld_apaystatus' => $paydata['status'], 'fld_abalance' => $balance], ['fld_appointid' => $appoint_id]);
-            $this->Common_model->UpdateData('payments', ['fld_ppaid' => $paydata['amount'], 'fld_pbalance' => $balance, 'fld_pstatus' => $paystatus, 'fld_ppayid' => $payment_id, 'fld_pvpa' => $paydata['vpa'], 'fld_pemail' => $paydata['email'], 'fld_pcont' => $paydata['contact'], 'fld_pcreated_at' => $paydata['created_at'], 'fld_pamt' => $paydata['amount']], ['fld_appid' => $app_detail[0]['fld_aid']]);
-
-            // Sending Email
-            $tomail         = (! empty($app_detail)) ? $app_detail[0]['fld_email'] : $info['email_id'];
-            $name           = (! empty($app_detail)) ? $app_detail[0]['fld_name'] : $info['uname'];
-            $subject        = '🎉 Your Booking is Confirmed! Thank You for Booking with Us! 🎉';
-            $court          = $app_detail[0]['fld_aserv'];
-            $court_date     = $app_detail[0]['fld_adate'];
-            $timings        = json_decode($app_detail[0]['fld_atime']);
-            $newrate        = $app_detail[0]['fld_arate'];
-            $coupon_amount  = $app_detail[0]['fld_acpamt'];
-            $gst_amount     = 0;
-            $payment_amount = $app_detail[0]['fld_arate'];
-
-            $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' => $appoint_id, 'court' => $court, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => $coupon_amount, 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
-
-            $Pdf    = $this->pdf_generate($appoint_id);
-            $mail   = SendEmail($tomail, "", "", $subject, $bookingtemplates, $Pdf);
-            $result = $this->Common_model->UpdateData('appointments', ['fld_conf_email' => $mail], ['fld_appointid' => $appoint_id]);
-        }
-
-        $response = (! empty($result)) ? ['status' => 200, 'alert_msg' => alertMsg('add_suc')] : ['status' => 401, 'alert_msg' => alertMsg('add_fail')];
-        echo json_encode($response);
-        exit;
-    }
-
-    public function pdf_generate($AppointID = NULL) {
-        $table1     = 'appointments A';
-        $table2     = 'appointment_meta AM';
-        $table3     = 'customers C';
-        $table4     = 'users U';
-        $table5     = 'coupons CP';
+	public function pdf_generate($AppointID = NULL) {
+		$table1 = 'appointments A';
+        $table2 = 'appointment_meta AM';
+        $table3 = 'customers C';
+        $table4 = 'users U';
+        $table5 = 'coupons CP';
         $table1cond = '`AM`.`fld_amappid` = `A`.`fld_aid`';
         $table2cond = '`A`.`fld_acustid` = `C`.`fld_id`';
         $table3cond = '`AM`.`fld_amstaffid` = `U`.`fld_uid`';
