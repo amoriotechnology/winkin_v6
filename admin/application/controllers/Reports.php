@@ -788,7 +788,12 @@ class Reports extends CI_Controller {
                         $col_where["DATE_FORMAT(fld_adate, '%d/%m/%Y') LIKE"] = "%$searchValue%";
                         break;
                     case 5:
-                        $col_where["fld_atime LIKE"] = "%$searchValue%";
+                        if (strpos($searchValue, '-') !== false) {
+                            list($startTime, $endTime) = explode(" - ", $searchValue); 
+                            $col_where["fld_atime LIKE"] = "%$startTime%";
+                        } else {
+                            $col_where["fld_atime LIKE"] = "%$searchValue%";
+                        }
                         break;
                     }
                 }
@@ -803,15 +808,12 @@ class Reports extends CI_Controller {
 
 
         $data = [];
+        $formatted_time = '';
         $i    = $start + 1;
 
         foreach ($items as $item) {
             $app_start_time = json_decode($item['fld_atime'], true);
-            if (is_array($app_start_time) && count($app_start_time) > 0) {
-                $formatted_time = implode(' - ', array_map(fn($time) => str_replace('.', ':', $time), $app_start_time));
-            } else {
-                $formatted_time = '';
-            }
+            $formatted_time = TimeDuration($app_start_time[0], $item['fld_aduring']);
 
             $courtname = (($item['fld_aserv'] == 'courtA') ? 'Court A' : 'Court B');
             $action    = '<div class="dropdown ms-2">
@@ -829,9 +831,9 @@ class Reports extends CI_Controller {
                 "fld_aid"         => $i,
                 "fld_appointid"   => $item['fld_appointid'],
                 "fld_aserv"       => $courtname,
-                "fld_booked_date" => showDate($item['fld_booked_date']),
+                "fld_booked_date" => date('m/d/Y', strtotime($item['fld_booked_date'])),
                 "fld_adate"       => showDate($item['fld_adate']),
-                "fld_atime"       => $formatted_time,
+                "fld_atime"       => $app_start_time[0].' - '.$formatted_time,
                 'action'          => $action,
             ];
             $i++;
