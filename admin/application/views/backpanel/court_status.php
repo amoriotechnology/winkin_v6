@@ -15,8 +15,8 @@
       font-size: 24px;
     }
     .booked-slot {
-        background-color: #ffcccc !important; /* Light red background */
-        border-color: #ff0000 !important; /* Red border */
+        background-color: #ffcccc !important; 
+        border-color: #ff0000 !important; 
         cursor: not-allowed;
         opacity: 0.6;
     }
@@ -43,6 +43,10 @@
     
     .wizard-nav{
         display: none !important; 
+    }
+    small{
+        font-size: 1.0em;
+        font-weight: bold;
     }
 </style>
 
@@ -253,7 +257,8 @@ if(!empty($edit_appoint)) {
                                                 <div class="row gy-3">
                                                     <div class="col-xl-4">
                                                         <label for="paymode"> <b>Payment Mode</b></label>
-                                                        <select name="pay_mode" class="form-select" id="paymode">
+                                                        <select name="pay_mode" class="form-select" id="paymode" required>
+                                                            <option value="">Select Payment Mode</option>
                                                             <option value="Online">Online</option>
                                                             <option value="Cash">Cash</option>
                                                             <option value="Upi">Upi</option>
@@ -301,7 +306,6 @@ if(!empty($edit_appoint)) {
                                         <input type="hidden" name="appoint_id" id="appoint_id" value="<?= !empty($edit_appoint[$appkey]['app_id']) ? $edit_appoint[$appkey]['app_id'] : ''; ?>">
                                         <div class="mb-4 text-center">
                                             <button type="submit" id="pay-btn" class="btn btn-success">Submit</button>
-                                         
                                         </div>
                                     </div>
                                 </aside>
@@ -730,6 +734,17 @@ $(document).ready(function() {
             $('#coupon_apply').text('Apply');
         }
     });
+
+    // Change Button name
+    $('#paymode').on('change', function() {
+        var paymentType = $('select[name="pay_mode"]').val();
+        if (paymentType == 'Online') {
+            $('#pay-btn').text('Pay Now'); 
+        } else {
+            $('#pay-btn').text('Submit'); 
+        }
+    });
+
 });
 
 

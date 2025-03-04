@@ -49,8 +49,12 @@
         border-radius: 25px 0px 0px 25px;
     }
     
-  .wizard-nav {
+    .wizard-nav {
         display: none !important;
+    }
+    small{
+        font-size: 1.0em
+        font-weight: bold;
     }
 </style>
 

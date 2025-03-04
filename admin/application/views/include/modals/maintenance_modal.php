@@ -121,6 +121,7 @@ document.addEventListener("DOMContentLoaded", function() {
         $("#mnt_date").flatpickr({
             dateFormat: "d-m-Y",
             minDate: "today", 
+            maxDate: new Date().fp_incr(30),
             onChange: function(selectedDates, dateStr, instance) {
                 selectedDate = dateStr; 
                 disableSelectedDate();
@@ -131,6 +132,7 @@ document.addEventListener("DOMContentLoaded", function() {
             $("#mnt_date").flatpickr({
                 dateFormat: "d-m-Y",
                 minDate: "today", 
+                maxDate: new Date().fp_incr(30),
                 disable: selectedDate ? [selectedDate] : [], 
                 onChange: function(selectedDates, dateStr, instance) {
                     selectedDate = dateStr; 
