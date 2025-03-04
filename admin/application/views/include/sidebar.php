@@ -61,11 +61,8 @@
 
 			<!-- Start::header-element -->
 			<li class="header-element d-md-none d-block">
-				<a href="javascript:void(0);" class="header-link" data-bs-toggle="modal"
-					data-bs-target="#header-responsive-search">
-					<!-- Start::header-link-icon -->
-					<i class="bi bi-search header-link-icon"></i>
-					<!-- End::header-link-icon -->
+				<a href="javascript:void(0);" class="header-link dropdown-toggle h6" data-bs-toggle="modal" data-bs-target="#wishesModal" style="position: relative; top: 3px; left: 3px;">
+					<i class="bi bi-cake2"></i>
 				</a>
 			</li>
 			<!-- End::header-element -->
