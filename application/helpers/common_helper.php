@@ -477,8 +477,8 @@ use Razorpay\Api\Api;
 			if(!empty($data)) {
 				$amount = (float)$data['amount'] - ((isset($data['couponAmount']) && !empty($data['couponAmount'])) ? (float)$data['couponAmount'] : 0);
 
-				$timeing= implode(',',$data['time']);
-				$timing = BookingTime($timeing);
+				$gettime= implode(',',$data['time']);
+				$timing = BookingTime($gettime);
 				$template = '<!DOCTYPE html>
 								<html>
 								  <head>
@@ -588,45 +588,45 @@ use Razorpay\Api\Api;
 								      <div style="max-width: 680px; margin: 0 auto;" class="email-container">
 								    
 								          <div class="content bg-primary">
-								              <div class="div-left">
-								                <p class="text-white">Payment successfully <small><br>processed on '.showDate(CURDATE).'</small></p>
-								                <h1>₹'.round($amount, 2).'</h1>
-								              </div>
+								              <table class="width: 100%">';
+													if ($data['payment_method'] !== '') {
+														$template .=  '<tr> <th> Payment successfully processed on '.showDate(CURDATE).' </th> </tr>';
+													} else {
+														$template .=  '<tr> <th> Payment is Pending </th> </tr>';
+													}
+													$template .=  '<tr> <th> <h2> ₹'.round($amount, 2).'</th> </tr> </h2>
+												</table>
+								          </div>';
+										  if ($data['payment_method'] !== '') {
+											$template .=  '<p> Your payment against WINKIN for ₹'.round($amount, 2).' is successful.</p>';
+										 } else {
+											$template .=  '<p> Your payment against WINKIN for ₹'.round($amount, 2).' is pending. </p>';
+										 }
+										
+								        $template .= '<table width="100%" border="0">
+														<tr class="container">
+															<th> BOOKING ID : <span class="text-muted">#'.$data['appoint_id'].'</span> </th>
+														</tr>';
+														if ($data['payment_method'] !== '') {
+															$template .= '<tr class="container"> <th> AMOUNT ₹: <span class="text-muted">'.round($amount, 2).'</span> </th> </tr>
+															<tr class="container"><th> PAYMENT MODE : <span class="text-muted">'.$data['payment_method'].'</span> </th></tr>';
+														}
 
-								              <div class="div-right">
-								                <img src="data:image/png;base64,'.base64_encode(file_get_contents('assets/images/company_imgs/verified.png')).'" width="50%" height="50%">
-								              </div>
-								          </div>
+										$template .= '<tr class="container">
+															<th> COURT : <span class="text-muted">'.(($data['court'] == 'courtA') ? "Court A" : "Court B").'</span> </th>
+														</tr>
+														<tr class="container">
+															<th> SLOT DATE : <span class="text-muted">'.$data['date'].'</span> </th>
+														</tr>
+														<tr class="container">
+															<th> SLOT TIME : <span class="text-muted">'.$timing.'</span> </th>
+														</tr>
+													</table>';	
 
-								          <p> Your payment of ₹'.round($amount, 2).' to WINKIN has been successfully processed. </p>
+								        $template .= '<p> Track all your booking details easily through your <a href="https://winkin.in">Winkin My Bookings page</a>.</p>
+							  			  			  <p> PFA(Please Find Attachment).</p>
 
-								          <div class="container">
-								            <div class="div-left">
-								              Booking ID: <br>
-								              <span class="text-muted"> #'.$data['appoint_id'].'</span> <br><br>
-								              Amount: <br>
-								              <span class="text-muted">₹'.round($amount, 2).'</span> <br><br>
-								              Area: <br>
-								              <span class="text-muted">'.$data['court'].'</span>
-								            </div>
-
-								            <div class="div-left">
-								              Date: <br>
-								              <span class="text-muted">'.$data['date'].'</span> <br><br>
-								              Paymode: <br>
-								              <span class="text-muted">Online</span> <br><br>
-								              Timing: <br>
-								              <span class="text-muted">'.$timing.'</span>
-								            </div>
-								          </div>
-
-								          <p> Track all your booking details easily through your <a href="https://winkin.in">Winkin My Bookings page</a>.</p>
-
-								          <div class="container">
-								            <p class="text-center">
-								              Copyright © 2025. All rights reserved.
-								            </p>
-								          </div>
+								          <div class="container"> <p class="text-center"> Copyright © 2025. All rights reserved.</p> </div>
 								        </div>
 								    </center>
 								  </body>

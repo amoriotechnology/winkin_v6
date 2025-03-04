@@ -34,7 +34,6 @@ class Settings extends CI_Controller {
 	    $this->load->vars(['day_report' => $day_report]);
 	}
 
-
 	public function attendance() {
 
 		$attendance = $this->Common_model->GetJoinDatas('staff_attendance SA', 'users U', "`SA`.`fld_sastaffid` = `U`.`fld_uid`", "`SA`.*, `U`.*", ['fld_saflag' => '']);
@@ -50,7 +49,6 @@ class Settings extends CI_Controller {
 		];
 		$this->load->view('template', $data);
 	}
-
 	public function add_attend() {
 
 		$staff_id = trim($this->input->post('staff_name', TRUE));
@@ -82,7 +80,6 @@ class Settings extends CI_Controller {
 		exit;
 	}
 
-
 	public function admin_setting($ID = NULL) {
 
 		$setting = $this->Common_model->GetDatas('settings', "*");
@@ -112,8 +109,6 @@ class Settings extends CI_Controller {
 		];
 		$this->load->view('template', $data);
 	}
-
-
 	public function add_holiday() {
 
 		$info = checkLogin();
@@ -132,8 +127,6 @@ class Settings extends CI_Controller {
 		echo json_encode($response);
 		exit;
 	}
-
-
 	public function send_wishes() {
 
 		$bday_emails = $this->input->post('bday_wish', TRUE);
@@ -175,8 +168,6 @@ class Settings extends CI_Controller {
 		echo json_encode(['status'=> 200, 'word' => $send]);
 		exit;
 	}
-
-
 	public function holiday_calender() {
 		$year = trim($this->input->post('year', TRUE));
 		$getcalender = $this->Common_model->GetDatas("staff_attendance", "*", ['fld_sastatus' => 'H', "YEAR(`fld_sadate`)" => $year, 'fld_saflag' => ''], "`fld_sadate` ASC");
@@ -206,7 +197,6 @@ class Settings extends CI_Controller {
 		echo $holidays;
 		exit;
 	}
-
 
 	public function setting_config() {
 
@@ -275,7 +265,6 @@ class Settings extends CI_Controller {
 		echo json_encode($response);
 		exit;
 	}
-
 
 	public function common_update() {
         $id = trim($this->input->post('id', TRUE));
@@ -353,7 +342,6 @@ class Settings extends CI_Controller {
 		exit;
 	}
 
-
 	public function send_otp() {
 
 		if ($this->input->post('csrf-token', TRUE) !== $this->security->get_csrf_hash()) {
@@ -373,7 +361,6 @@ class Settings extends CI_Controller {
 		exit;
 	}
 
-
 	public function validateOTP() {
 
 		if ($this->input->post('csrf-token', TRUE) !== $this->security->get_csrf_hash()) {
@@ -387,8 +374,6 @@ class Settings extends CI_Controller {
     	echo json_encode($response);
     	exit;
 	}
-
-
 	public function change_password() {
 
 		if ($this->input->post('csrf-token', TRUE) !== $this->security->get_csrf_hash()) {

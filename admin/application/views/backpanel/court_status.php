@@ -233,7 +233,7 @@ if(!empty($edit_appoint)) {
 
                                             <div class="col-xl-6 mt-3">
                                                 <label for="cust_lname" class="form-label">Last Name </label>
-                                                <input type="text" name="cust_lname" class="form-control" id="cust_lname" value="" oninput="AlphaOnly(this)" value="<?= (!empty($edit_appoint[$appkey]['app_lname']) ? $edit_appoint[$appkey]['app_lname'] : ''); ?>"/>
+                                                <input type="text" name="cust_lname" class="form-control" id="cust_lname" value="<?= (!empty($edit_appoint[$appkey]['app_lname']) ? $edit_appoint[$appkey]['app_lname'] : ''); ?>" oninput="AlphaOnly(this)" value="<?= (!empty($edit_appoint[$appkey]['app_lname']) ? $edit_appoint[$appkey]['app_lname'] : ''); ?>"/>
                                                 <span class="appoint-error-msg text-danger"></span>
                                             </div>
                                            
@@ -301,7 +301,6 @@ if(!empty($edit_appoint)) {
                                         <input type="hidden" name="appoint_id" id="appoint_id" value="<?= !empty($edit_appoint[$appkey]['app_id']) ? $edit_appoint[$appkey]['app_id'] : ''; ?>">
                                         <div class="mb-4 text-center">
                                             <button type="submit" id="pay-btn" class="btn btn-success">Submit</button>
-                                         
                                         </div>
                                     </div>
                                 </aside>
@@ -316,8 +315,6 @@ if(!empty($edit_appoint)) {
 </div>
     
 <!-- End:: Section-2 -->
-
-
 <script type="text/javascript">
  
 $(document).ready(function() {
@@ -491,8 +488,9 @@ $(document).ready(function() {
                 success: function(res) {
                     element.removeClass('text-danger').addClass('text-success').html('New Customer');
                     if(res != "") {
-                    element.removeClass('text-danger').addClass('text-success').html('New Customer');
+                        element.removeClass('text-danger').addClass('text-success').html('New Customer');
                         element.addClass('text-success').html('Existing Customer');
+                        console.log(res, res.custlname);
                         $('#cust_name').val(res.custname);
                         $('#cust_lname').val(res.custlname);
                         $('#cust_email').val(res.custemail);
@@ -588,7 +586,7 @@ $(document).ready(function() {
 
         var paymentType = $('select[name="pay_mode"]').val();
         var submitButton = $('button[type="submit"]');
-        // submitButton.prop('disabled', true).text('Loading...');
+        submitButton.prop('disabled', true).text('Loading...');
         var paymode = $('#paymode').val();
 
         if(paymode == "Online") {

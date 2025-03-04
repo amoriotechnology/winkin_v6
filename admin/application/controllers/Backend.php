@@ -379,25 +379,6 @@ class Backend extends CI_Controller {
 
 	    $startTime = new DateTime($mnt_frm_time);
 	    $endTime   = new DateTime($mnt_end_time);
-        
-        // Start time is greater than End time Condition
-	    if ($startTime >= $endTime) {
-		    echo json_encode([
-		        'status' => 400,
-		        'alert_msg' => 'Start time must be earlier than end time.'
-		    ]);
-		    return;
-		}
-        
-        // Start Time and End time is equal Condition
-	    if ($startTime == $endTime) {
-		    echo json_encode([
-		        'status' => 400,
-		        'alert_msg' => 'Start time and end time cannot be the same.'
-		    ]);
-		    return;
-		}
-
 	    $interval  = new DateInterval('PT30M');
 	    $timeSlots = [];
 
@@ -622,7 +603,7 @@ class Backend extends CI_Controller {
 		$history = $paymode;
 		if (!empty($appid)) {
 
-			$appoint_id = $this->input->post('appoint_id');
+			$AppointID = $this->input->post('appoint_id');
 			/* Check already have the slot, date, time */
 			$bookedtime = '';
 			for($b = 0; $b < count($timings); $b++) {
@@ -685,7 +666,6 @@ class Backend extends CI_Controller {
 					'fld_aserv' => $admincourt,
 					'fld_aduring' => $duration,
 					'fld_arate' => $rate,
-					'fld_apaymode' => $paymode,
 					'fld_abalance' => $balance,
 					'fld_gst_amt' => $gst_amount,
 					'fld_pay_charge' => $payment_amount,
@@ -699,12 +679,11 @@ class Backend extends CI_Controller {
             
 			$tomail = (!empty($check)) ? $check[0]['fld_email'] : $custemail;
 			$name = (!empty($check)) ? $check[0]['fld_name'] : $custname;
-            $subject = ':tada: Your Booking Has Been Rescheduled! :tada:';
-            $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $appoint_id, 'court' => $admincourt, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => '', 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
+			$paymode = $this->Common_model->GetDatas('appointments', "fld_apaymode", ['fld_appointid' => $AppointID]);
+            $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $AppointID, 'payment_method' => $paymode[0]['fld_apaymode'], 'court' => $admincourt, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => '', 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
             
-			$getPdf = $this->pdf_generate($appoint_id);
-			var_dump($getPdf);exit;
-			$mail = SendEmail($tomail, "", "", $subject, $bookingtemplates, $getPdf);
+			$getPdf = $this->pdf_generate($AppointID);
+			$mail = SendEmail($tomail, "", "", '🎉 Your Booking Has Been Rescheduled! 🎉', $bookingtemplates, $getPdf);
 			$this->Common_model->UpdateData('appointments', ['fld_conf_email' => $mail], ['fld_aid' => $appid]);
 		    
 		} else {
@@ -848,7 +827,7 @@ class Backend extends CI_Controller {
 			$gst_amount = 0;
 			$payment_amount = $app_detail[0]['fld_arate'];
 		
-			$bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $appoint_id, 'court' => $court, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => $coupon_amount, 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
+			$bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $appoint_id, 'payment_method' => 'Online', 'court' => $court, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => $coupon_amount, 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
 		
 			$Pdf = $this->pdf_generate($appoint_id);
 			$mail = SendEmail($tomail, "", "", $subject, $bookingtemplates, $Pdf);
