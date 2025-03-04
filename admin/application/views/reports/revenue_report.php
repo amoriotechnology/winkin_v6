@@ -25,7 +25,7 @@
                             <table id="revenue_list" class="table table-bordered table-hover text-nowrap w-100">
                                 <thead class="table-dark">
                                     <tr class="filter-row">
-                                        <th></th>
+                                        <th>Advanced<br>Search</th>
                                         <th><input type="text" class="column-search form-control"></th>
                                         <th><input type="text" class="column-search form-control"></th>
                                         <th><input type="text" class="column-search form-control"></th>
@@ -45,7 +45,7 @@
                                         <th>Booking ID</th>
                                         <th>Area</th>
                                         <th>Name</th>
-                                        <th>Phone</th>
+                                        <th>Phone No.</th>
                                         <th>Pay mode</th>
                                         <th>Payment Date</th>
                                         <th>Amount(₹)</th>

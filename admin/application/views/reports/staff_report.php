@@ -24,7 +24,7 @@
                             <table id="staff_list" class="table table-bordered table-hover text-nowrap w-100">
                                 <thead class="table-dark">
                                     <tr class="filter-row">
-                                        <th></th>
+                                        <th>Advanced<br>Search</th>
                                         <th><input type="text" class="column-search form-control"></th>
                                         <th><input type="text" class="column-search form-control"></th>
                                         <th><input type="text" class="column-search form-control"></th>

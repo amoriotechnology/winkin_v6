@@ -73,3 +73,12 @@
 @media (min-width: 1200px) {
     .cal-menu-wrapper { height: 14vh; }
 }
+
+
+/* col visibility */
+button.dt-button.buttons-columnVisibility.active {
+    background-color: #5b6e00 !important;
+}
+button.dt-button.buttons-columnVisibility {
+    background-color: #cac4c4;
+  }

@@ -52,10 +52,26 @@
     .wizard-nav {
         display: none !important;
     }
+
+    .no-dropdown {
+    all: unset;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #5b6e00;
+    cursor: text !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: transparent;
+    padding-right: 10px;
+}
+
     small{
         font-size: 1.0em
         font-weight: bold;
     }
+
 </style>
 
 
@@ -450,7 +466,22 @@ if(!empty($edit_appoint)) {
     </section>
     
 <!-- End:: Section-2 -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let yearDropdown = document.querySelector(".calendar-years");
+    let monthDropdown = document.querySelector(".calendar-months");
 
+    // Add class to remove dropdown arrow and prevent clicking
+    yearDropdown.classList.add("no-dropdown");
+    monthDropdown.classList.add("no-dropdown");
+
+    // Disable the select elements
+    yearDropdown.setAttribute("disabled", true);
+    monthDropdown.setAttribute("disabled", true);
+});
+
+
+</script>
 
 <script type="text/javascript">
  

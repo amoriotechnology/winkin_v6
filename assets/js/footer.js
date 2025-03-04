@@ -138,6 +138,14 @@ function AlphaOnly(input, maxLength = 0) {
     }
 }
 
+function AlphaWithSpaces(input, maxLength = 0) {
+    input.value = input.value.replace(/[^a-zA-Z\s]/g, ''); // Allow letters and spaces
+    if (maxLength > 0 && input.value.length > maxLength) {
+        input.value = input.value.slice(0, maxLength);
+    }
+}
+
+
 
 /*----------- Validate numbers only use number, dot & str length ------------*/
 function AmtOnly(input, maxLength) {
