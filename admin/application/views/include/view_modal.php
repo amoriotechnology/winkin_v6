@@ -201,10 +201,10 @@
                     <tr> <th> <td></td> </th> </tr>
 
                     <tr class="table-info text-center">
-                        <th class="text-uppercase">Court Area</th>
-                        <th class="text-uppercase">Duration</th>
-                        <th class="text-uppercase">Timing(s)</th>
-                        <th class="text-uppercase">Rate(₹)</th>
+                        <th class="text-uppercase">COURT</th>
+                        <th class="text-uppercase">DURATION</th>
+                        <th class="text-uppercase">TIMING</th>
+                        <th class="text-uppercase">AMOUNT (₹)</th>
                     </tr>
                     <tbody id="servbody"></tbody>
                     <tfoot id="servfoot"></tfoot>
@@ -266,7 +266,6 @@
                         $('#cnotes').html(res[0].fld_notes);
 
                     } else if(type == 'staff') {
-                        console.log(res, "res", res[0].fld_staff_designation);
                         $('#staffid').html(res[0].fld_staffid);
                         $('#staffname').html(res[0].fld_uname);
                         $('#staffphone').html(res[0].fld_uphone);
@@ -304,7 +303,7 @@
                         var key = Object.keys(res);
                         $('#appo_id').html(res[key].app_id);
                         $('#book_date').html(displayDateOnly(res[key].book_date));
-                        $('#app_date').html(displayDate(res[key].app_date)+'<br>'+ res[key].app_time );
+                        $('#app_date').html(displayDate(res[key].app_date)+'<br>'+ TimeAlign(res[key].app_time ));
                         $('#app_name').html(res[key].app_name+' '+res[key].app_lname);
                         $('#app_number').html(res[key].app_phone);
                         $('#app_email').html(res[key].app_email);
@@ -312,48 +311,47 @@
                         $('#app_dob').html(displayDate(res[key].cdob));
                         var tbody = '';
                         var rate = 0;
-                            
-                        var servData = res[key].serv_data.reverse();
+                        
+                        var servData = arrayAlign(res[key].serv_data);
                         for (var i = 0; i < servData.length; i++) {
                             
                             var value = servData[i];
                             if(i == 0) { var starttime = value[3]; }
                             if(i > 0) { starttime = endtime; }
                             var endtime = DisplayTime(starttime, parseFloat(value[1]));
-                            var courtname = 'Court B';
-                            if(value[0] == 'courtA') { courtname = 'Court A'; }
+                            var courtname = (value[0] == 'courtA') ? 'Court A' : 'Court B';
 
                             tbody += '<tr class="text-center"> <td>' + courtname + '</td> <td>' + value[1] + '</td> <td>' + starttime+' - '+ endtime + '</td> <td>' + (value[2] / 1.18).toFixed(2)  + '</td> </tr>';
                             rate += parseFloat((value[2] / 1.18).toFixed(2));
                         }
-                          var subtotal = rate.toFixed(2);
+                        var subtotal = rate.toFixed(2);
                         var gst = (parseFloat(res[key].app_gst) || 0).toFixed(2);
                         var total =  (parseFloat(subtotal+gst)).toFixed(2);
                         var tfoot = '<tr class="table-info text-center"> ' +
-                            '<td colspan="3" align="right"> <b>Sub Total: </b></td> ' +
+                            '<td colspan="3" align="right"> <b>SUBTOTAL: </b></td> ' +
                             '<td> <b>' + subtotal + '</b> </td>  </tr>';
 
                         if (res[key].app_cpamt > 0) {
                             tfoot += '<tr class="table-info text-center">' +
-                                '<td colspan="3" align="right"> <b>Discount ('+res[key].coup_perc+'%): </b></td> ' +
+                                '<td colspan="3" align="right"> <b>DISCOUNT ('+res[key].coup_perc+'%): </b></td> ' +
                                 '<td> <b>' + res[key].app_cpamt + '</b> </td> </tr>';
                         }
                       tfoot += '<tr class="table-info text-center"> ' +
-                                '<td colspan="3" align="right"> <b>GST (18%) : </b></td> ' +
+                                '<td colspan="3" align="right"> <b>GST AMOUNT (18%) : </b></td> ' +
                                 '<td> <b>' + gst + '</b> </td>' + 
                                 '</tr>' + 
                             '<tr class="table-info text-center"> ' +
-                                '<td colspan="3" align="right"> <b>Total : </b></td> ' +
+                                '<td colspan="3" align="right"> <b>TOTAL : </b></td> ' +
                                 '<td> <b>' + (parseFloat(subtotal) + parseFloat(gst)).toFixed(2) + '</b> </td>' + 
                             '</tr>' ;
 
                         tfoot += '<tr class="table-info text-center"> ' +
-                            '<td colspan="3" align="right"> <b>Paid: </b></td> ' +
+                            '<td colspan="3" align="right"> <b>PAID: </b></td> ' +
                             '<td> <b>' + (res[key].app_paid) + '</b> </td>' + 
                             '</tr>' + 
 
                             '<tr class="table-info text-center"> ' +
-                            '<td colspan="3" align="right"> <b>Balance: </b></td> ' +
+                            '<td colspan="3" align="right"> <b>BALANCE: </b></td> ' +
                             '<td> <b>' + (parseFloat(res[key].app_balance) <= 0 ? 0 : res[key].app_balance) + '</b> </td> </tr>';
 
                         $('#servbody').append(tbody);

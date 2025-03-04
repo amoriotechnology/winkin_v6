@@ -7,7 +7,6 @@ use Dompdf\Dompdf;
 class Backend extends CI_Controller {
 
     public $load, $session, $input;
-
     public function __construct() {
         parent::__construct();
         $this->load->model('Common_model');
@@ -37,12 +36,13 @@ class Backend extends CI_Controller {
     }
 
     public function index() {
+
         $start      = date('Y-m-01');
         $end        = date('Y-m-31');
         $today      = date('Y-m-d');
         $year_month = date('Y-m');
 
-        /* Get current month appointment count */
+                /* Get current month appointment count */
         $mon_appoi_cnt = $this->Common_model->RawSQL(" SELECT COUNT(DISTINCT `fld_appointid`) AS mon_appoint_cnt FROM `appointments` WHERE DATE_FORMAT(`fld_adate`, '%Y-%m') = '$year_month'  AND `fld_astatus` != 'Cancelled'  AND `fld_astatus` != 'Pending' AND `fld_atype` IS NULL");
 
         /* Get today appointment count */
@@ -73,9 +73,8 @@ class Backend extends CI_Controller {
         $bookingCount = $this->Common_model->totalBookingCount() ?: 0;
 
         /*Revenue Data passing in charts */
-        $revenueData = $this->Common_model->GetJoinDatas('appointments A', 'payments P', "A.fld_aid = P.fld_appid", "DATE_FORMAT(A.fld_booked_date, '%Y-%m') AS month, SUM(P.fld_prate) AS total_revenue", ["YEAR(P.fld_pdate)" => date('Y')], "A.fld_atype IS NULL", "month",["A.fld_astatus" => ['Pending', 'Cancelled']]);
-      
-       if (empty($revenueData)) {$revenueData = [];}
+        $revenueData = $this->Common_model->GetJoinDatas('appointments A', 'payments P', "A.fld_aid = P.fld_appid", "DATE_FORMAT(A.fld_booked_date, '%Y-%m') AS month, SUM(P.fld_prate) AS total_revenue", ["YEAR(P.fld_pdate)" => date('Y')], "A.fld_atype IS NULL", "month", ["A.fld_astatus" => ['Pending', 'Cancelled']]);
+        if (empty($revenueData)) {$revenueData = [];}
 
         $data = [
             'info'               => checkLogin(),
@@ -365,6 +364,25 @@ class Backend extends CI_Controller {
 
         $startTime = new DateTime($mnt_frm_time);
         $endTime   = new DateTime($mnt_end_time);
+
+        // Start time is greater than End time Condition
+        if ($startTime >= $endTime) {
+            echo json_encode([
+                'status'    => 400,
+                'alert_msg' => 'Start time must be earlier than end time.',
+            ]);
+            return;
+        }
+
+        // Start Time and End time is equal Condition
+        if ($startTime == $endTime) {
+            echo json_encode([
+                'status'    => 400,
+                'alert_msg' => 'Start time and end time cannot be the same.',
+            ]);
+            return;
+        }
+
         $interval  = new DateInterval('PT30M');
         $timeSlots = [];
 
@@ -586,6 +604,21 @@ class Backend extends CI_Controller {
 
         $history = $paymode;
         if (! empty($appid)) {
+
+            /* Check already have the slot, date, time */
+            $bookedtime = '';
+            for ($b = 0; $b < count($timings); $b++) {
+                $bookedtime .= "'" . $timings[$b] . "', ";
+            }
+
+            $prev_booking = $this->Common_model->GetJoinDatas('appointments A', 'appointment_meta AM', 'A.fld_aid = AM.fld_amappid', "`fld_adate`", "`fld_amstaff_time` IN ('" . trim($bookedtime, ", '") . "') AND `fld_adate` = '" . $court_date . "' AND `fld_aserv` = '" . $admincourt . "' AND `fld_astatus` != 'Cancelled'");
+            if (! empty($prev_booking)) {
+                echo json_encode(['status' => 300, 'alert_msg' => 'Sorry, but this slot is already booked!']);
+                exit;
+            }
+
+            $appoint_id = $this->input->post('appoint_id');
+
             $check       = ExistorNot('customers', ['fld_phone' => $custphone]);
             $cust_rec    = $this->Common_model->GetDatas('customers', 'fld_id, fld_custid', ['fld_id !=' => ''], "`fld_id` DESC");
             $newduration = $newrate = 0;
@@ -595,15 +628,9 @@ class Backend extends CI_Controller {
                 $newrate += (float) $court_rate[$admincourt];
             }
             $this->Common_model->UpdateData('customers', [
-                'fld_name'         => $custname,
-                'fld_lastname'     => $custlname,
-                'fld_email'        => $custemail,
-                'fld_gender'       => $custgender,
-                'fld_dob'          => struDate($custdob),
-                'fld_maritial_sts' => $mari_sts,
-                'fld_anniversary'  => struDate($anni_date),
-                'fld_address'      => $custaddr,
-                'fld_notes'        => $custpref,
+                'fld_name'     => $custname,
+                'fld_lastname' => $custlname,
+                'fld_email'    => $custemail,
             ], ["fld_phone" => $custphone]);
 
             $CustID = $this->input->post('cust_id', TRUE);
@@ -644,10 +671,8 @@ class Backend extends CI_Controller {
                 'fld_arate'      => $rate,
                 'fld_apaymode'   => $paymode,
                 'fld_abalance'   => $balance,
-                'fld_anotes'     => $serv_notes,
                 'fld_gst_amt'    => $gst_amount,
                 'fld_pay_charge' => $payment_amount,
-                'fld_apaymode'   => $paymode,
             ];
 
             logEntry('Reschedule Appointment', 'Court Status', 'Reschedule Appointment successfully', 'Update', json_encode($timings));
@@ -659,8 +684,9 @@ class Backend extends CI_Controller {
             $name             = (! empty($check)) ? $check[0]['fld_name'] : $custname;
             $subject          = ':tada: Your Booking Has Been Rescheduled! :tada:';
             $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' => $this->input->post('appoint_id'), 'court' => $admincourt, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => '', 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
-            $getPdf           = $this->pdf_generate($this->input->post('appoint_id'));
-            $mail             = SendEmail($tomail, "", "", $subject, $bookingtemplates, $getPdf);
+
+            $getPdf = $this->pdf_generate($this->input->post('appoint_id'));
+            $mail   = SendEmail($tomail, "", "", $subject, $bookingtemplates, $getPdf);
             $this->Common_model->UpdateData('appointments', ['fld_conf_email' => $mail], ['fld_aid' => $appid]);
 
         } else {
@@ -737,7 +763,6 @@ class Backend extends CI_Controller {
             $app_lastid = $this->Common_model->InsertData('appointments', $new_app_data);
 
             for ($a = 0; $a < count($timings); $a++) {
-
                 /* --- For Appointment Meta --- */
                 $new_meta_data[$a] = [
                     'fld_amappid '     => $app_lastid,
@@ -779,7 +804,7 @@ class Backend extends CI_Controller {
         if (! empty($paydata)) {
             if ($razorstatus == "created" || $razorstatus == "authorized" || $razorstatus == "pending") {
                 $paystatus = $status = "Pending";
-            } elseif ($razorstatus == "failed" || $razorstatus == "cancelled") {
+            } elseif ($razorstatus == "Failed" || $razorstatus == "failed" || $razorstatus == "cancelled") {
                 $paystatus = $status = "Cancelled";
             } elseif ($razorstatus == "refunded") {
                 $paystatus = $status = "Refunded";
@@ -796,7 +821,7 @@ class Backend extends CI_Controller {
             // Sending Email
             $tomail         = (! empty($app_detail)) ? $app_detail[0]['fld_email'] : $info['email_id'];
             $name           = (! empty($app_detail)) ? $app_detail[0]['fld_name'] : $info['uname'];
-            $subject        = 'ðŸŽ‰ Your Booking is Confirmed! Thank You for Booking with Us! ðŸŽ‰';
+            $subject        = '🎉 Your Booking is Confirmed! Thank You for Booking with Us! 🎉';
             $court          = $app_detail[0]['fld_aserv'];
             $court_date     = $app_detail[0]['fld_adate'];
             $timings        = json_decode($app_detail[0]['fld_atime']);
@@ -856,8 +881,7 @@ class Backend extends CI_Controller {
     public function updatePayment() {
         $id        = trim($this->input->post('id', TRUE));
         $payamount = trim($this->input->post('payamount', TRUE));
-
-        $payments = $this->Common_model->GetDatas('payments', '*', ['fld_appid' => $id]);
+        $payments  = $this->Common_model->GetDatas('payments', '*', ['fld_appid' => $id]);
 
         $paid    = ((float) $payments[0]['fld_ppaid'] + $payamount);
         $balance = (float) $payments[0]['fld_pbalance'];
@@ -1124,7 +1148,7 @@ class Backend extends CI_Controller {
                             $response .= '</small>';
                         }
 
-                        if (! $isDisabled || ($resch_bool == true)) {
+                        if (! $isDisabled) {
                             $response .= '<input type="checkbox" name="times[]" class="d-none form-check-input rounded-circle form-checked-success" ' . ($isChecked ? 'checked' : '') . ' value="' . showTime($looptime) . '" >';
                         }
 

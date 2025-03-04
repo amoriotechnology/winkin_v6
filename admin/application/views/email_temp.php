@@ -98,58 +98,59 @@
           width: 100%;
           text-align: center !important;
         }
+
+        .text-left {
+          float: left;
+          width: 100%;
+        }
       </style>
     </head>
 
     <body style="background-color: #F2F2F2;">
 
     <center>
-      <div style="max-width: 680px; margin: 0 auto;" class="email-container">
+      <div style="max-width: 680px; margin: 25px;" class="email-container">
         <p class="left">
           <img src="<?= base_url('../assets/images/company_imgs/winkin_logo.svg'); ?>" style="float: left;" />
         </p>
       
           <div class="content bg-primary">
-              <div class="div-left">
-                Payment successfully <small>processed on 14/02/2025</small>
-                <h1>₹1000</h1>
-              </div>
-
-              <div class="div-right">
-                <img src="<?= base_url('../assets/images/company_imgs/verified.png'); ?>" width="50%" height="50%">
-              </div>
+            <table>
+              <tr>
+                <th> Payment successfully processed on 14/02/2025 </th>
+              </tr>
+              <tr>
+                <th> <h1>₹1000</h1> </th>
+              </tr>
+            </table>
           </div>
 
-          <p>
-            Your payment against WINKIN for ₹1000 is successful.
-          </p>
-
-          <div class="container">
-            <div class="div-left">
-              Booking ID: <br>
-              <span class="text-muted">#WB1000</span> <br><br>
-              Amount: <br>
-              <span class="text-muted">₹1000</span> <br><br>
-              Area: <br>
-              <span class="text-muted">CourtA</span>
-            </div>
-
-            <div class="div-left">
-              Booking Date: <br>
-              <span class="text-muted">14/02/2025</span> <br><br>
-              Payment Mode: <br>
-              <span class="text-muted">Online</span> <br><br>
-              Timing: <br>
-              <span class="text-muted">04:00 PM, 04:30 PM</span>
-            </div>
-          </div>
-
+          <p> Your payment against WINKIN for ₹1000 is successful. </p>
+          <table width="100%" border="0">
+            <tr class="container">
+              <th> BOOKING ID : <span class="text-muted">#WB1000</span> </th>
+            </tr>
+            <tr class="container">
+              <th> AMOUNT ₹: <span class="text-muted">1000</span> </th>
+            </tr>
+            <tr class="container">
+              <th> PAYMENT MODE : <span class="text-muted">Online</span> </th>
+            </tr>
+            <tr class="container">
+              <th> COURT : <span class="text-muted">CourtA</span> </th>
+            </tr>
+            <tr class="container">
+              <th> SLOT DATE : <span class="text-muted">14/02/2025</span> </th>
+            </tr>
+            <tr class="container">
+              <th> TIMINMG : <span class="text-muted">04:00 PM, 04:30 PM</span> </th>
+            </tr>
+          </table>
           <p> Track all your booking details easily through your Winkin My Bookings page.</p>
+          <p> PFA(Please Find Attachment).</p>
 
-          <div class="container">
-            <p class="text-center">
-              Copyright © 2025. All rights reserved.
-            </p>
+          <div class="">
+            <p class="text-center"> Copyright © 2025. All rights reserved. </p>
           </div>
 
 

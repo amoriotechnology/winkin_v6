@@ -33,7 +33,23 @@
 
     $('.prev').on('click', function() { wizard.unlock(); });
 
-    $(".dot, .next").on("click", function(event) { validateWizard(wizard, wizard.getCurrentStep()); });
+    $(".dot, .next").on("click", function(event) { 
+		
+		var timeselected = 0;
+		$("input[name='times[]']:checked").each(function() {
+			timeselected++;
+		});
+
+		$('.choose-time-error-msg').html('');
+		var extslot = $("#existing_slot").val();
+		if(extslot > 0 && parseInt(extslot) != timeselected) {
+			wizard.lock();
+			$('.choose-time-error-msg').focus();
+            $('.choose-time-error-msg').html('<div class="alert alert-danger alert-dismissible fade show"> <b> Kindly select '+ extslot +' slots.</b> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"><i class="bi bi-x"></i></button> </div>');
+		} else {
+			validateWizard(wizard, wizard.getCurrentStep()); 
+		}
+	});
 
 })();
 

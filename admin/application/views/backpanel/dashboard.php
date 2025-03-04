@@ -18,7 +18,7 @@
             <div class="col-xxl-12">
                 <div class="row">
                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 col-12">
-                        <div class="card custom-card border-5 rounded-4 border-top-0 border-end-0 border-bottom-0 border-success">
+                        <div class="today_booking card custom-card border-5 rounded-4 border-top-0 border-end-0 border-bottom-0 border-success">
                             <div class="card-body p-3">
                                 <div class="d-flex align-items-start justify-content-between">
                                     <div>

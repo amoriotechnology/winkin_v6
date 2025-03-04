@@ -425,13 +425,13 @@ class Settings extends CI_Controller {
         $info        = checkLogin();
         $newpass     = trim($this->input->post('new', TRUE));
         $confirmpass = trim($this->input->post('confirm', TRUE));
-
-        $pass     = $this->encryption->encrypt($newpass);
-        $result   = $this->Common_model->UpdateData('users', ['fld_upass' => $pass], ['fld_uemail' => $info['email_id']]);
-        $response = ($result > 0) ? ['status' => 200, 'title' => 'OTP Validated', 'text' => 'Matched Successfully!!!'] : ['status' => 400, 'title' => 'OTP Validated', 'text' => 'Invalid OTP Number'];
-        echo json_encode($response);
-        exit;
-    }
+		$pass = $this->encryption->encrypt($newpass);
+		$result = $this->Common_model->UpdateData('users', ['fld_upass' => $pass], ['fld_uemail' => $info['email_id']]);
+		$response = ($result > 0) ? ['status' => 200, 'title' => 'OTP Validated', 'text' => 'Matched Successfully!!!'] : ['status' => 400, 'title' => 'OTP Validated', 'text' => 'Invalid OTP Number'];
+		$this->session->unset_userdata('login_info');
+		echo json_encode($response);
+    	exit;
+	}
 
     // Coupons 
     public function coupons($ID = NULL) {

@@ -58,65 +58,70 @@ class Reports extends CI_Controller {
         $searchColumns  = $this->input->post('search_columns', TRUE);
         $datefilter     = $this->input->post('datefilter', TRUE);
         $where = ['A.fld_atype' => NULL];
-        if (! empty($searchColumns)) {
-            foreach ($searchColumns as $columnIndex => $searchValue) {
-                if (! empty($searchValue)) {
-                    switch ($columnIndex) {
-                    case 1: // Booking ID
-                        $where["A.fld_appointid LIKE"] = "%$searchValue%";
-                        break;
-                    case 2: // Booking Date
-                        $searchDate                                               = date("Y-m-d", strtotime(str_replace('/', '-', $searchValue)));
-                        $where["DATE_FORMAT(A.fld_booked_date, '%Y-%m-%d') LIKE"] = "%$searchDate%";
-                        break;
-                    case 3: // Slot Date
-                        $searchDate                                         = date("Y-m-d", strtotime(str_replace('/', '-', $searchValue)));
-                        $where["DATE_FORMAT(A.fld_adate, '%Y-%m-%d') LIKE"] = "%$searchDate%";
-                        break;
-                    case 4: // Slot Time
-                        if (strpos($searchValue, '-') !== false) {
-                            list($startTime, $endTime) = explode(" - ", $searchValue);
-                            $where["A.fld_atime LIKE"] = "%$startTime%";
-                        } else {
-                            $where["A.fld_atime LIKE"] = "%$searchValue%";
-                        }
-                        break;
-                    case 5: // Court
-                        $searchValueFormatted                        = str_replace(' ', '', $searchValue);
-                        $where["REPLACE(A.fld_aserv, ' ', '') LIKE"] = "%$searchValueFormatted%";
-                        break;
-                    case 6: // Name
-                        $where["C.fld_name LIKE"] = "%$searchValue%";
-                        break;
-                    case 7: // Phone
-                        $where["C.fld_phone LIKE"] = "%$searchValue%";
-                        break;
-                    case 8: // Pay Mode
-                        $where["A.fld_apaymode LIKE"] = "%$searchValue%";
-                        break;
-                    case 9: // Amount
-                        $where["A.fld_arate LIKE"] = '%' . (float) str_replace(',', '', $searchValue) . '%';
-                        break;
-                    case 10: // Status
-                        $where["A.fld_astatus LIKE"] = "%$searchValue%";
-                        break;
-                    }
-                }
-            }
-        }
-        $dateWhere = [];
-        if (! empty($datefilter)) {
-            $split       = explode(" to ", $datefilter);
-            $startfilter = struDate($split[0]);
-            $endfilter   = struDate($split[1]);
-            $startfilter = $startfilter . " 00:00:00";
-            $endfilter   = $endfilter . " 23:59:59";
-            $dateWhere = [
-                'A.fld_adate >=' => $startfilter,
-                'A.fld_adate <=' => $endfilter,
-            ];
-        }
-        $where = array_merge($where, $dateWhere);
+
+	    if (!empty($searchColumns)) {
+		    foreach ($searchColumns as $columnIndex => $searchValue) {
+		        if (!empty($searchValue)) {
+		            switch ($columnIndex) {
+
+		                case 1: // Booking ID
+		                    $where["A.fld_appointid LIKE"] = "%$searchValue%";		                    
+		                    break;
+		                case 2: // Booking Date
+		                    $searchDate = date("Y-m-d", strtotime(str_replace('/', '-', $searchValue)));
+                            $where["DATE_FORMAT(A.fld_booked_date, '%Y-%m-%d') LIKE"] = "%$searchDate%";
+		                    break;
+		                case 3: // Slot Date
+		                    $searchDate = date("Y-m-d", strtotime(str_replace('/', '-', $searchValue)));
+                            $where["DATE_FORMAT(A.fld_adate, '%Y-%m-%d') LIKE"] = "%$searchDate%";
+		                    break;
+		                case 4: // Slot Time
+		                    if (strpos($searchValue, '-') !== false) {
+		                        list($startTime, $endTime) = explode(" - ", $searchValue);
+		                        $where["A.fld_atime LIKE"] = "%$startTime%"; 
+		                    } else {
+		                        $where["A.fld_atime LIKE"] = "%$searchValue%";
+		                    }
+		                    break;
+		                case 5: // Court
+		                    $searchValueFormatted = str_replace(' ', '', $searchValue);
+                            $where["REPLACE(A.fld_aserv, ' ', '') LIKE"] = "%$searchValueFormatted%";
+		                    break;
+		                case 6: // Name
+		                    $where["C.fld_name LIKE"] = "%$searchValue%";
+		                    break;
+		                case 7: // Phone
+		                    $where["C.fld_phone LIKE"] = "%$searchValue%";
+		                    break;
+		                case 8: // Pay Mode
+		                    $where["A.fld_apaymode LIKE"] = "%$searchValue%";
+		                    break;
+		                case 9: // Amount
+		                    $where["A.fld_arate LIKE"] = '%' . (float) str_replace(',', '', $searchValue) . '%';
+		                    break;
+		                case 10: // Status
+		                    $where["A.fld_astatus LIKE"] = "%$searchValue%";
+		                    break;
+		            }
+		        }
+		    }
+		}
+
+		$dateWhere = [];
+		if (!empty($datefilter)) {
+		    $split = explode(" to ", $datefilter);
+	        $startfilter = struDate($split[0]);
+	        $endfilter = struDate($split[1]);
+	        $startfilter = $startfilter . " 00:00:00";
+            $endfilter =  $endfilter . " 23:59:59"; 
+
+		    $dateWhere = [
+		        'A.fld_adate >=' => $startfilter,
+		        'A.fld_adate <=' => $endfilter
+		    ];
+		}
+
+		$where = array_merge($where, $dateWhere);
         $total = $this->Common_model->GetJoinDatas('appointments A', 'customers C', '`A`.`fld_acustid` = `C`.`fld_id`', '*', $where);
         $totalItems = count($total);
         $table1     = 'appointments A';
@@ -136,6 +141,7 @@ class Reports extends CI_Controller {
 		                    <i class="ti ti-dots-vertical"></i>
 		                </button>
 		                <ul class="dropdown-menu">';
+
             if ($item['fld_abalance'] > 0 && $item['fld_astatus'] != "Pending") {
                 $action .= ' <li> <a class="dropdown-item" href="' . base_url('pdf_generate/' . $item['fld_appointid']) . '" target="_blank" role="button">Bill</a> </li>';
             }
@@ -144,9 +150,11 @@ class Reports extends CI_Controller {
 		                        <a class="dropdown-item" onclick="PaymentData(\'' . md5($item['fld_appointid']) . '\', \'appointment\')" data-bs-toggle="modal" href="#PaymentModal" role="button">Payment</a>
 		                    </li>';
             }
+
             // Conditional logic for the "Reschedule" button
+
             if (strtotime(CURDATE) <= strtotime($item['fld_adate']) && ($item['fld_astatus'] == "Confirm" || $item['fld_astatus'] == "Confirmed")) {
-                $action .= '<li><a class="dropdown-item" href="' . base_url('viewcourt_status/' . md5($item['fld_appointid'])) . '">Reschedule</a></li>';
+                 $action .= '<li><a class="dropdown-item" href="' . base_url('viewcourt_status/' . md5($item['fld_appointid'])) . '">Reschedule</a></li>';
             }
             if (strtotime(CURDATE) <= strtotime($item['fld_adate']) && $item['fld_astatus'] != "Cancelled" && $item['fld_astatus'] != "Completed" && $item['fld_astatus'] != "Pending" && $item['fld_astatus'] != "Playing") {
                 $action .= '<li> <a class="dropdown-item update_booking" data-id="' . md5($item['fld_appointid']) . '" data-status="Playing" >Playing...</a> </li>';
@@ -699,7 +707,12 @@ class Reports extends CI_Controller {
                         $col_where["DATE_FORMAT(fld_adate, '%d/%m/%Y') LIKE"] = "%$searchValue%";
                         break;
                     case 5:
-                        $col_where["fld_atime LIKE"] = "%$searchValue%";
+                        if (strpos($searchValue, '-') !== false) {
+                            list($startTime, $endTime) = explode(" - ", $searchValue); 
+                            $col_where["fld_atime LIKE"] = "%$startTime%";
+                        } else {
+                            $col_where["fld_atime LIKE"] = "%$searchValue%";
+                        }
                         break;
                     }
                 }
@@ -709,14 +722,11 @@ class Reports extends CI_Controller {
         $totalItems = $this->Common_model->getCount('appointments', ["fld_atype" => 'Maintenance'], $searchdata, '`fld_aid`', $col_where);
         $items = $this->Common_model->PaginationData('appointments', "*", ["fld_atype" => 'Maintenance'], "`$orderField` $orderDirection", 10, $start, $searchdata, $col_where);
         $data = [];
+        $formatted_time = '';
         $i    = $start + 1;
         foreach ($items as $item) {
             $app_start_time = json_decode($item['fld_atime'], true);
-            if (is_array($app_start_time) && count($app_start_time) > 0) {
-                $formatted_time = implode(' - ', array_map(fn($time) => str_replace('.', ':', $time), $app_start_time));
-            } else {
-                $formatted_time = '';
-            }
+            $formatted_time = TimeDuration($app_start_time[0], $item['fld_aduring']);
             $courtname = (($item['fld_aserv'] == 'courtA') ? 'Court A' : 'Court B');
             $action    = '<div class="dropdown ms-2">
                             <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -732,9 +742,9 @@ class Reports extends CI_Controller {
                 "fld_aid"         => $i,
                 "fld_appointid"   => $item['fld_appointid'],
                 "fld_aserv"       => $courtname,
-                "fld_booked_date" => showDate($item['fld_booked_date']),
+                "fld_booked_date" => date('m/d/Y', strtotime($item['fld_booked_date'])),
                 "fld_adate"       => showDate($item['fld_adate']),
-                "fld_atime"       => $formatted_time,
+                "fld_atime"       => $app_start_time[0].' - '.$formatted_time,
                 'action'          => $action,
             ];
             $i++;
