@@ -78,14 +78,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group  = 'default';
 $query_builder = TRUE;
 
-
-
 $db['default'] = [
     'dsn'          => '',
     'hostname'     => 'localhost',
-    'username'     => 'root',
-    'password'     => '',
-    'database'     => 'pickelball_03mar25', 
+    'username' => 'amoriotech_pickleball',
+	  'password' => 'Amorio@2022',
+	  'database' => 'amoriotech_pickleball',
     'dbdriver'     => 'mysqli',
     'dbprefix'     => '',
     'pconnect'     => FALSE,
@@ -101,5 +99,3 @@ $db['default'] = [
     'failover'     => [],
     'save_queries' => TRUE,
 ];
-
-
