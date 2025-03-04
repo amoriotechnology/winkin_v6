@@ -74,7 +74,7 @@
                                                     <?php if($appoint['app_sts'] != "Cancelled") { ?>
                                                    <span class="text-muted"> Update Status: </span>
                                                    <select name="sts" class="form-control mt-1 app_status" data-id="<?= md5($appoint['app_id']); ?>" >
-                                                        <option value="Confirm" <?= isSame($appoint['app_sts'], 'Confirm'); ?> >Confirm</option>
+                                                        <option value="Confirmed" <?= isSame($appoint['app_sts'], 'Confirmed'); ?> >Confirm</option>
                                                         <option value="Completed" <?= isSame($appoint['app_sts'], 'Completed'); ?> >Completed</option>
                                                         <option value="Cancelled" <?= isSame($appoint['app_sts'], 'Cancelled'); ?> >Cancelled</option>
                                                         <option value="In-Progress" <?= isSame($appoint['app_sts'], 'In-Progress'); ?> >In-Progress</option>
