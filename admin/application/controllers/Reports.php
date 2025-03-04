@@ -1,37 +1,28 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
 class Reports extends CI_Controller {
-
     public function __construct() {
         parent::__construct();
         $this->load->model('Common_model');
         $this->load->library('pagination');
-
         $dayopens = $this->Common_model->GetDatas('appointments', 'SUM(fld_arate) AS total_amount', [
             "fld_adate"    => date('Y-m-d', strtotime('-1 day')),
             "fld_apaymode" => 'cash',
         ]);
-
         $checkdaycloseStatus = $this->Common_model->check_dayclose_status();
-
         if (isset($checkdaycloseStatus[0]) && $checkdaycloseStatus[0]['status'] == 1) {
             $daycloses = [];
         } else {
             $daycloses = $this->Common_model->getPaymentsSummary();
         }
-
         $day_report = [
             'dayOpen'    => $dayopens,
             'daycloses'  => $daycloses,
             'day_status' => ((isset($checkdaycloseStatus[0])) ? $checkdaycloseStatus[0]['status'] : ""),
         ];
-
         $this->load->vars(['day_report' => $day_report]);
     }
-
     public function bookings($AppointID = NULL) {
-
         $services   = $this->Common_model->GetDatas('services', "fld_sid, fld_scate, fld_sname, fld_sduration, fld_srate, fld_stype", ['fld_sstatus' => 'Active'], "`fld_sid` DESC");
         $setting    = $this->Common_model->GetDatas('settings', "fld_weekdays");
         $phone_nos  = $this->Common_model->GetDatas('customers', "fld_phone");
@@ -40,12 +31,10 @@ class Reports extends CI_Controller {
         if (! empty($leaves)) {
             foreach ($leaves as $value) {$leave_data[$value['fld_sadate']] = $value['fld_satitle'];}
         }
-
         $edit_appoint = [];
         if (! empty($AppointID)) {
             $edit_appoint = $this->Common_model->RawSQL("SELECT `A`.*, `C`.*, `AM`.*, `CP`.*, (SELECT SUM(`P`.`fld_ppaid`) FROM `payments` `P` WHERE `P`.`fld_appid` = `A`.`fld_aid`) AS `paid`, (SELECT `P`.`fld_pbalance` FROM `payments` `P` WHERE `P`.`fld_appid` = `A`.`fld_aid` ORDER BY `P`.`fld_pdate` DESC LIMIT 1) AS `balance` FROM `appointments` `A` JOIN `customers` `C` ON `A`.`fld_acustid` = `C`.`fld_id` JOIN `appointment_meta` `AM` ON `AM`.`fld_amappid` = `A`.`fld_aid` LEFT JOIN `coupons` `CP` ON `CP`.`fld_cpid` = `A`.`fld_acpid` WHERE md5(`fld_appointid`) = '" . $AppointID . "' ORDER BY `fld_aid` DESC ");
         }
-
         $data = [
             'info'            => checkLogin(),
             'wishes'          => GetWishes(),
@@ -60,7 +49,6 @@ class Reports extends CI_Controller {
         ];
         $this->load->view('template', $data);
     }
-
     public function getbookingsDatas() {
         $limit          = $this->input->post('length', TRUE);
         $start          = $this->input->post('start', TRUE);
@@ -69,14 +57,11 @@ class Reports extends CI_Controller {
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
         $searchColumns  = $this->input->post('search_columns', TRUE);
         $datefilter     = $this->input->post('datefilter', TRUE);
-
         $where = ['A.fld_atype' => NULL];
-
         if (! empty($searchColumns)) {
             foreach ($searchColumns as $columnIndex => $searchValue) {
                 if (! empty($searchValue)) {
                     switch ($columnIndex) {
-
                     case 1: // Booking ID
                         $where["A.fld_appointid LIKE"] = "%$searchValue%";
                         break;
@@ -119,7 +104,6 @@ class Reports extends CI_Controller {
                 }
             }
         }
-
         $dateWhere = [];
         if (! empty($datefilter)) {
             $split       = explode(" to ", $datefilter);
@@ -127,19 +111,14 @@ class Reports extends CI_Controller {
             $endfilter   = struDate($split[1]);
             $startfilter = $startfilter . " 00:00:00";
             $endfilter   = $endfilter . " 23:59:59";
-
             $dateWhere = [
                 'A.fld_adate >=' => $startfilter,
                 'A.fld_adate <=' => $endfilter,
             ];
         }
-
         $where = array_merge($where, $dateWhere);
-
         $total = $this->Common_model->GetJoinDatas('appointments A', 'customers C', '`A`.`fld_acustid` = `C`.`fld_id`', '*', $where);
-
         $totalItems = count($total);
-
         $table1     = 'appointments A';
         $table2     = 'customers C';
         $table3     = 'coupons CP';
@@ -148,13 +127,10 @@ class Reports extends CI_Controller {
         $select     = "A.*, C.*, CP.*,
 	       (SELECT SUM(P.fld_ppaid) FROM payments P WHERE P.fld_appid = A.fld_aid) AS paid,
 	       (SELECT P.fld_pbalance FROM payments P WHERE P.fld_appid = A.fld_aid ORDER BY P.fld_pdate DESC LIMIT 1) AS balance";
-
         $items = $this->Common_model->getBookings($table1, $table2, $table3, $table1cond, $table2cond, $select, "STR_TO_DATE(`A`.`fld_atime`, '%h:%i %p') ASC", $limit, $start, $search, $where);
         $data  = [];
         $i     = $start + 1;
-
         foreach ($items as $item) {
-
             $action = '<div class="dropdown ms-2">
 		                <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 		                    <i class="ti ti-dots-vertical"></i>
@@ -172,29 +148,23 @@ class Reports extends CI_Controller {
             if (strtotime(CURDATE) <= strtotime($item['fld_adate']) && ($item['fld_astatus'] == "Confirm" || $item['fld_astatus'] == "Confirmed")) {
                 $action .= '<li><a class="dropdown-item" href="' . base_url('viewcourt_status/' . md5($item['fld_appointid'])) . '">Reschedule</a></li>';
             }
-
             if (strtotime(CURDATE) <= strtotime($item['fld_adate']) && $item['fld_astatus'] != "Cancelled" && $item['fld_astatus'] != "Completed" && $item['fld_astatus'] != "Pending" && $item['fld_astatus'] != "Playing") {
                 $action .= '<li> <a class="dropdown-item update_booking" data-id="' . md5($item['fld_appointid']) . '" data-status="Playing" >Playing...</a> </li>';
             }
-
             if (strtotime(CURDATE) <= strtotime($item['fld_adate']) && $item['fld_astatus'] != "Cancelled" && $item['fld_astatus'] != "Completed" && $item['fld_astatus'] != "Pending") {
                 $action .= '<li> <a class="dropdown-item update_booking" data-id="' . md5($item['fld_appointid']) . '" data-status="Completed" >Completed.</a> </li>';
             }
-
             if (strtotime(CURDATE) <= strtotime($item['fld_adate']) && ($item['fld_astatus'] == "Confirm" || $item['fld_astatus'] == "Confirmed")) {
                 $action .= '<li> <a class="dropdown-item cancel-confirm" data-id="' . md5($item['fld_aid']) . '">Cancel</a> </li>';
             }
             if ($item['fld_astatus'] == "Pending") {
-
                 $action .= '<li> <a class="dropdown-item release_confirm" data-id="' . md5($item['fld_appointid']) . '" data-status="admin_update">Confirm</a> </li>';
                 $action .= '<li> <a class="dropdown-item release_confirm" data-id="' . md5($item['fld_appointid']) . '" data-status="Release">Release</a></li>';
             }
             $action .= '</ul>
 		            </div>';
-
             $app_start_time = json_decode($item['fld_atime']);
             $courtname      = (($item['fld_aserv'] == 'courtA') ? 'Court A' : 'Court B');
-
             $data[] = [
                 "fld_aid"         => $i,
                 "fld_appointid"   => '<a class="text-decoration-underline" onclick="viewDatas(\'' . md5($item['fld_appointid']) . '\', \'appointment\')" data-bs-toggle="modal" href="#viewAppintment" title="View" alt="View">' . $item['fld_appointid'] . '</a>',
@@ -211,7 +181,6 @@ class Reports extends CI_Controller {
             ];
             $i++;
         }
-
         $response = [
             "draw"            => $this->input->post('draw', TRUE),
             "recordsTotal"    => $totalItems,
@@ -220,7 +189,6 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     // Get Logs Datas
     public function getlogDatas() {
         $limit          = $this->input->post('length', TRUE);
@@ -230,7 +198,6 @@ class Reports extends CI_Controller {
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
         $datefilter     = $this->input->post('datefilter', TRUE);
         $where          = [];
-
         if (! empty($datefilter)) {
             $split       = explode(" to ", $datefilter);
             $startfilter = struDate($split[0]) . " 00:00:00";
@@ -240,17 +207,13 @@ class Reports extends CI_Controller {
                 'created_date <=' => $endfilter,
             ];
         }
-
         $total      = $this->Common_model->GetDatas('log_entry', "*", $where);
         $totalItems = count($total);
-
         $table1 = 'log_entry';
         $select = "*";
         $items  = $this->Common_model->getLogs($table1, $select, $orderField . ' ' . $orderDirection, $limit, $start, $search, $where);
-
         $data = [];
         $i    = $start + 1;
-
         foreach ($items as $item) {
             $status = $item['status'] == 'Fail' ?
             '<i class="bi bi-bookmark-x-fill text-danger test-white"></i>' :
@@ -269,7 +232,6 @@ class Reports extends CI_Controller {
             ];
             $i++;
         }
-
         $response = [
             "draw"            => $this->input->post('draw', TRUE),
             "recordsTotal"    => $totalItems,
@@ -278,14 +240,10 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     public function revenue() {
-
         $pageconfig = pageConfig('staff', 'users');
         $page_start = ($this->input->get('per_page')) ? $this->input->get('per_page') : 0;
-
         $sales_record = [];
-
         $data = [
             'info'          => checkLogin(),
             'wishes'        => GetWishes(),
@@ -295,20 +253,16 @@ class Reports extends CI_Controller {
         ];
         $this->load->view('template', $data);
     }
-
     public function getrevenueDatas() {
-
         $datefilter     = $this->input->post('datefilter', TRUE);
         $limit          = $this->input->post('length', TRUE);
         $start          = $this->input->post('start', TRUE);
         $search         = $this->input->post('search', TRUE)['value'];
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
-
         $searchColumns = $this->input->post('search_columns', TRUE);
         $totalItems    = 0;
        $col_where = ['A.fld_atype' => NULL];
-
         if (! empty($searchColumns)) {
             foreach ($searchColumns as $columnIndex => $searchValue) {
                 if (! empty($searchValue)) {
@@ -342,7 +296,6 @@ class Reports extends CI_Controller {
                 }
             }
         }
-
         $dateWhere = [];
         if (! empty($datefilter)) {
             $split       = explode(" to ", $datefilter);
@@ -350,7 +303,6 @@ class Reports extends CI_Controller {
             $endfilter   = struDate($split[1]);
             $startfilter = $startfilter . " 00:00:00";
             $endfilter   = $endfilter . " 23:59:59";
-
             $dateWhere = [
                 'P.fld_pdate >=' => $startfilter,
                 'P.fld_pdate <=' => $endfilter,
@@ -363,23 +315,18 @@ class Reports extends CI_Controller {
         $table1cond = '`A`.`fld_acustid` = `C`.`fld_id`';
         $table2cond = '`P`.`fld_appid` = `A`.`fld_aid`'; 
         $select     = "A.*, C.*, P.*";                  
-
         // Get the total items
         $total = $this->Common_model->GetJoinDatasThreeTable($table1, $table2, $table3, $table1cond, $table2cond, $select, $where);
         $totalItems = count($total);
-
         $table1     = 'appointments A';
         $table2     = 'customers C';
         $table3     = 'payments P';
         $table1cond = '`A`.`fld_acustid` = `C`.`fld_id`';
         $table2cond = '`P`.`fld_appid` = `A`.`fld_aid`';
         $select     = "A.*, C.*, P.*";
-
         $items = $this->Common_model->getRevenue($table1, $table2, $table3, $table1cond, $table2cond, $select, $orderField . ' ' . $orderDirection, $limit, $start, $search, $where);
-   echo $this->db->last_query();
         $data = [];
         $i    = (float) $start + 1;
-
         foreach ($items as $item) {
             $booking_date = date('d/m/Y', strtotime($item['fld_booked_date']));
             $payment_date = date('d/m/Y', strtotime($item['fld_pdate']));
@@ -400,7 +347,6 @@ class Reports extends CI_Controller {
             ];
             $i++;
         }
-
         $response = [
             "draw"            => ! empty($this->input->post('draw', TRUE)) ? $this->input->post('draw', TRUE) : 1,
             "recordsTotal"    => $totalItems,
@@ -409,7 +355,6 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     // Day Close Reports
     public function day_close() {
         $pageconfig      = pageConfig('staff', 'users');
@@ -424,7 +369,6 @@ class Reports extends CI_Controller {
         ];
         $this->load->view('template', $data);
     }
-
     public function getdaycloseDatas() {
         $datefilter     = $this->input->post('datefilter', TRUE);
         $limit          = $this->input->post('length', TRUE);
@@ -433,7 +377,6 @@ class Reports extends CI_Controller {
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
         $totalItems     = 0;
-
         $totalItems  = $this->Common_model->getCount('day_close');
         $table1      = 'day_close';
         $select      = "*";
@@ -468,7 +411,6 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     // Show modal View in Day Close
     public function showday_closeview() {
         $id       = $this->input->post('id');
@@ -482,14 +424,11 @@ class Reports extends CI_Controller {
         }
         exit;
     }
-
     public function customer($ID = NULL) {
-
         $edit_cust = [];
         if (! empty($ID)) {
             $edit_cust = $this->Common_model->GetDatas('customers', '*', ["md5(`fld_id`)" => $ID]);
         }
-
         $data = [
             'info'      => checkLogin(),
             'wishes'    => GetWishes(),
@@ -500,7 +439,6 @@ class Reports extends CI_Controller {
         ];
         $this->load->view('template', $data);
     }
-
     public function getcustomerDatas() {
         $limit          = $this->input->post('length', TRUE);
         $start          = $this->input->post('start', TRUE);
@@ -538,7 +476,6 @@ class Reports extends CI_Controller {
                 }
             }
         }
-
         $dateWhere = [];
         if (! empty($datefilter)) {
             $split       = explode(" to ", $datefilter);
@@ -546,34 +483,25 @@ class Reports extends CI_Controller {
             $endfilter   = struDate($split[1]);
             $startfilter = $startfilter . " 00:00:00";
             $endfilter   = $endfilter . " 23:59:59";
-
             $dateWhere = [
                 'fld_created_date >=' => $startfilter,
                 'fld_created_date <=' => $endfilter,
             ];
         }
-
         $col_where = array_merge($where, $dateWhere);
-
         $searchdata = ['fld_custid' => $search, 'fld_name' => $search, 'fld_phone' => $search, 'fld_email' => $search, "DATE_FORMAT(`fld_dob`, '%Y-%m-%d')" => $search, "DATE_FORMAT(`fld_created_date`, '%Y-%m-%d')" => $search];
-
         $totalItems = $this->Common_model->getCount('customers', "", $searchdata, "`fld_id`", $col_where);
         $items      = $this->Common_model->PaginationData('customers', "*", "", "`$orderField` $orderDirection", 10, $start, $searchdata, $col_where);
-
         $noofbook = $this->Common_model->GetDatas('appointments', "`fld_acustid`, COUNT(`fld_acustid`) as noofbook", ["fld_acustid !=" => ''], "", "fld_acustid");
-
         $book_cnt = [];
         if (! empty($noofbook)) {
             foreach ($noofbook as $val) {
                 $book_cnt[$val['fld_acustid']] = $val['noofbook'] ?? 0;
             }
         }
-
         $data = [];
         $i    = $start + 1;
-
         foreach ($items as $item) {
-
             $action = '<div class="dropdown ms-2">
 						    <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 						        <i class="ti ti-dots-vertical"></i>
@@ -587,7 +515,6 @@ class Reports extends CI_Controller {
 						        </li>
 						    </ul>
 						</div>';
-
             $data[] = [
                 "fld_id"           => $i,
                 "fld_created_date" => date('d/m/Y', strtotime($item['fld_created_date'])),
@@ -609,14 +536,11 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     public function category($ID = NULL) {
-
         $edit_cate = [];
         if (! empty($ID)) {
             $edit_cate = $this->Common_model->GetDatas('categorys', "*", ["md5(`fld_cateid`)" => $ID]);
         }
-
         $data = [
             'info'      => checkLogin(),
             'wishes'    => GetWishes(),
@@ -627,23 +551,18 @@ class Reports extends CI_Controller {
         ];
         $this->load->view('template', $data);
     }
-
     public function getcategoryDatas() {
-
         $limit          = $this->input->post('length', TRUE);
         $start          = $this->input->post('start', TRUE);
         $search         = $this->input->post('search', TRUE)['value'];
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
-
         $searchdata = ['fld_catename' => $search, 'fld_catetype' => $search, 'fld_catestatus' => $search];
         $totalItems = $this->Common_model->getCount('categorys', "", $searchdata);
         $items      = $this->Common_model->PaginationData('categorys', "*", "", "`$orderField` $orderDirection", 10, $start, $searchdata);
         $data       = [];
         $i          = $start + 1;
-
         foreach ($items as $item) {
-
             $status = (($item['fld_catestatus'] == "Active") ? "Deactive" : "Active");
             $action = '<div class="dropdown ms-2">
                             <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -658,7 +577,6 @@ class Reports extends CI_Controller {
                                 </li>
                             </ul>
                         </div>';
-
             $data[] = [
                 "fld_cateid"     => $i,
                 "fld_catename"   => $item['fld_catename'],
@@ -676,24 +594,19 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     // Coupon List
     public function getcouponDatas() {
-
         $limit          = $this->input->post('length', TRUE);
         $start          = $this->input->post('start', TRUE);
         $search         = $this->input->post('search', TRUE)['value'];
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
-
         $searchdata = ['fld_cpname' => $search, 'fld_cp_expdate' => $search, 'fld_cp_percentage' => $search];
         $totalItems = $this->Common_model->getCount('coupons', ["fld_cpflag" => 1], $searchdata);
         $items      = $this->Common_model->PaginationData('coupons', "*", ["fld_cpflag" => 1], "`$orderField` $orderDirection", 10, $start, $searchdata);
         $data       = [];
         $i          = $start + 1;
-
         foreach ($items as $item) {
-
             $status = (($item['fld_cpstatus'] == "Active") ? "Deactive" : "Active");
             $action = '<div class="dropdown ms-2">
                             <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -711,7 +624,6 @@ class Reports extends CI_Controller {
                                 </li>
                             </ul>
                         </div>';
-
             $data[] = [
                 "fld_cpid"          => $i,
                 "fld_cpname"        => $item['fld_cpname'],
@@ -734,25 +646,20 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     public function view_maintenance($ID = NULL) {
         $edit_maintenance = [];
         $first_time       = '';
         $last_time        = '';
-
         if (! empty($ID)) {
             $edit_maintenance = $this->Common_model->GetDatas('appointments', "*", ["md5(`fld_aid`)" => $ID, 'fld_atype' => 'Maintenance']);
-
             if (! empty($edit_maintenance) && isset($edit_maintenance[0]['fld_atime'])) {
                 $start_time = json_decode($edit_maintenance[0]['fld_atime'], true);
-
                 if (is_array($start_time) && ! empty($start_time)) {
                     $first_time = reset($start_time);
                     $last_time  = end($start_time);
                 }
             }
         }
-
         $data = [
             'info'             => checkLogin(),
             'wishes'           => GetWishes(),
@@ -765,16 +672,13 @@ class Reports extends CI_Controller {
         ];
         $this->load->view('template', $data);
     }
-
     // Court Maintenance
     public function getcourtMaintenanceDatas() {
-
         $limit          = $this->input->post('length', TRUE);
         $start          = $this->input->post('start', TRUE);
         $search         = $this->input->post('search', TRUE)['value'];
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
-
         $searchColumns = $this->input->post('search_columns', TRUE);
         $col_where     = [];
         if (! empty($searchColumns)) {
@@ -800,16 +704,11 @@ class Reports extends CI_Controller {
                 }
             }
         }
-
         $searchdata = ['fld_appointid' => $search, 'fld_aserv' => $search, 'fld_adate' => $search, 'fld_booked_date' => $search, 'fld_atime' => $search];
-
         $totalItems = $this->Common_model->getCount('appointments', ["fld_atype" => 'Maintenance'], $searchdata, '`fld_aid`', $col_where);
-
         $items = $this->Common_model->PaginationData('appointments', "*", ["fld_atype" => 'Maintenance'], "`$orderField` $orderDirection", 10, $start, $searchdata, $col_where);
-
         $data = [];
         $i    = $start + 1;
-
         foreach ($items as $item) {
             $app_start_time = json_decode($item['fld_atime'], true);
             if (is_array($app_start_time) && count($app_start_time) > 0) {
@@ -817,7 +716,6 @@ class Reports extends CI_Controller {
             } else {
                 $formatted_time = '';
             }
-
             $courtname = (($item['fld_aserv'] == 'courtA') ? 'Court A' : 'Court B');
             $action    = '<div class="dropdown ms-2">
                             <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -829,7 +727,6 @@ class Reports extends CI_Controller {
                                 </li>
                             </ul>
                         </div>';
-
             $data[] = [
                 "fld_aid"         => $i,
                 "fld_appointid"   => $item['fld_appointid'],
@@ -849,16 +746,12 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     public function service($ID = NULL) {
-
         $categorys = $this->Common_model->GetDatas('categorys', "fld_cateid, fld_catename, fld_catetype, fld_catestatus", ['fld_catestatus' => 'Active'], "`fld_catename` ASC");
-
         $edit_serv = [];
         if (! empty($ID)) {
             $edit_serv = $this->Common_model->GetDatas('services', "*", ["md5(`fld_sid`)" => $ID]);
         }
-
         $data = [
             'info'         => checkLogin(),
             'wishes'       => GetWishes(),
@@ -870,24 +763,18 @@ class Reports extends CI_Controller {
         ];
         $this->load->view('template', $data);
     }
-
     public function getserviceDatas() {
-
         $limit          = $this->input->post('length', TRUE);
         $start          = $this->input->post('start', TRUE);
         $search         = $this->input->post('search', TRUE)['value'];
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
-
         $searchdata = ['fld_scate' => $search, 'fld_sname' => $search, 'fld_sduration' => $search, 'fld_srate' => $search, 'fld_stype' => $search, 'fld_sdesc' => $search, 'fld_sstatus' => $search];
-
         $totalItems = $this->Common_model->getCount('services', "", $searchdata);
         $items      = $this->Common_model->PaginationData('services', "*", '', "`$orderField` $orderDirection", 10, $start, $searchdata);
         $data       = [];
         $i          = $start + 1;
-
         foreach ($items as $item) {
-
             $status = (($item['fld_sstatus'] == "Active") ? "Deactive" : "Active");
             $action = '<div class="dropdown ms-2">
 	                        <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -902,7 +789,6 @@ class Reports extends CI_Controller {
 	                            </li>
 	                        </ul>
 	                    </div>';
-
             $data[] = [
                 "fld_sid"       => $i,
                 "fld_scate"     => $item['fld_scate'],
@@ -924,19 +810,14 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     public function staff($ID = NULL) {
-
         $serv_data = [];
         $services  = $this->Common_model->PaginationData('access_modules', "*", [], "`fld_access_module` ASC");
-
         foreach ($services as $serv) {$serv_data[] = $serv['fld_access_module'];}
-
         $edit_staff = [];
         if (! empty($ID)) {
             $edit_staff = $this->Common_model->GetDatas('users', "*", ["md5(`fld_uid`)" => $ID, 'fld_uroles' => 2]);
         }
-
         $data = [
             'info'        => checkLogin(),
             'wishes'      => GetWishes(),
@@ -948,18 +829,14 @@ class Reports extends CI_Controller {
         ];
         $this->load->view('template', $data);
     }
-
     public function getstaffDatas() {
-
         $limit          = $this->input->post('length', TRUE);
         $start          = $this->input->post('start', TRUE);
         $search         = $this->input->post('search', TRUE)['value'];
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
         $datefilter     = $this->input->post('datefilter', TRUE);
-
         $searchColumns = $this->input->post('search_columns', TRUE);
-
         $where = [];
         if (! empty($searchColumns)) {
             foreach ($searchColumns as $columnIndex => $searchValue) {
@@ -990,7 +867,6 @@ class Reports extends CI_Controller {
                 }
             }
         }
-
         $dateWhere = [];
         if (! empty($datefilter)) {
             $split       = explode(" to ", $datefilter);
@@ -998,32 +874,24 @@ class Reports extends CI_Controller {
             $endfilter   = struDate($split[1]);
             $startfilter = $startfilter . " 00:00:00";
             $endfilter   = $endfilter . " 23:59:59";
-
             $dateWhere = [
                 'fld_ucreated_date >=' => $startfilter,
                 'fld_ucreated_date <=' => $endfilter,
             ];
         }
-
         $col_where = array_merge($where, $dateWhere);
-
         $searchdata = ['fld_uname' => $search, 'fld_staffid' => $search, 'fld_uphone' => $search, 'fld_uemail' => $search, 'fld_ustatus' => $search, 'fld_access' => $search, "DATE_FORMAT(`fld_udob`, '%d/%m/%Y')" => $search];
-
         $totalItems = $this->Common_model->getCount('users', ['fld_uroles' => 2], $searchdata, "`fld_uid`", $col_where);
         $items      = $this->Common_model->PaginationData('users', "*", ['fld_uroles' => 2], "`$orderField` $orderDirection", 10, $start, $searchdata, $col_where);
         $data       = [];
         $i          = $start + 1;
-
         foreach ($items as $item) {
-
             $status     = (($item['fld_ustatus'] == "Active") ? "Deactive" : "Active");
             $accessTags = json_decode($item['fld_access'], true);
-
             $fld_access_html = "";
             if (! empty($accessTags) && is_array($accessTags)) {
                 $fld_access_html = implode(', </br>', array_column($accessTags, 'value')) . '</br>';
             }
-
             $action = '<div class="dropdown ms-2">
                         <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="ti ti-dots-vertical"></i>
@@ -1040,7 +908,6 @@ class Reports extends CI_Controller {
                             </li>
                         </ul>
                     </div>';
-
             $data[] = [
                 "fld_uid"     => $i,
                 "fld_staffid" => $item['fld_staffid'],
@@ -1062,14 +929,10 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     public function leaves($ID = NULL) {
-
         $staff_ids = $this->Common_model->GetDatas('users', '*', ["fld_uroles" => 2]);
-
         $edit_leave = [];
         if (! empty($ID)) {$edit_leave = $this->Common_model->GetDatas('leaves', '*', ["md5(`fld_lid`)" => $ID]);}
-
         $data = [
             'info'       => checkLogin(),
             'wishes'     => GetWishes(),
@@ -1078,21 +941,16 @@ class Reports extends CI_Controller {
             'content'    => 'reports/leave_report',
             'modals'     => 'include/modals/leave_modal',
         ];
-
         $this->load->view('template', $data);
     }
-
     public function getleaveDatas() {
-
         $info           = checkLogin();
         $limit          = $this->input->post('length', TRUE);
         $start          = $this->input->post('start', TRUE);
         $search         = $this->input->post('search', TRUE)['value'];
         $orderField     = $this->input->post('columns', TRUE)[$this->input->post('order', TRUE)[0]['column']]['data'];
         $orderDirection = $this->input->post("order", TRUE)[0]["dir"];
-
         $searchdata = ['fld_lperson' => $search, 'fld_lstaff_id' => $search, 'fld_lreason' => $search, 'fld_lrej_reason' => $search, 'fld_lstatus' => $search, "DATE_FORMAT(`fld_ldate`, '%M %d,%Y')" => $search];
-
         $where = ['fld_lstatus !=' => 'Deleted'];
         if (checkLogin()['role'] == STAFF) {
             $where = ['fld_lstatus !=' => 'Deleted', 'fld_lstaff_id' => checkLogin()['uid']];
@@ -1101,41 +959,30 @@ class Reports extends CI_Controller {
         $items      = $this->Common_model->PaginationData('leaves', "*", $where, "`$orderField` $orderDirection", 10, $start, $searchdata);
         $data       = [];
         $i          = $start + 1;
-
         foreach ($items as $item) {
-
             $edit = '<li> <a onclick="editLeave(this)" data-id="' . md5($item['fld_lid']) . '" class="dropdown-item"  data-bs-effect="effect-flip-vertical" data-bs-toggle="modal" data-bs-target="#LeaveModal"> Edit</a> </li>';
-
             $approve = '<li> <a class="dropdown-item update_leave" data-id="' . $item['fld_lid'] . '" data-status="Approved" > Approved</a> </li>';
-
             $reject = '<li>
 	                        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#RejectModal" data-id="' . md5($item['fld_lid']) . '" data-status="Rejected" onclick="viewDatas(\'' . md5($item['fld_lid']) . '\', \'leave\')" > Rejected </a>
 	                    </li>';
-
             $delete = '<li> <a class="dropdown-item update_btn" data-id="' . md5($item['fld_lid']) . '" data-status="Deleted" > Delete </a> </li>';
-
             $rej_req = '<li>
     						<a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#RejectModal" data-id="' . md5($item['fld_lid']) . '" data-status="Request Reject" onclick="viewDatas(\'' . md5($item['fld_lid']) . '\', \'leave\')" > Request for Reject </a>
     					</li>';
             $approve_req = '<li>
         						<a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#RejectModal" data-id="' . md5($item['fld_lid']) . '" data-status="Request Reject" onclick="viewDatas(\'' . md5($item['fld_lid']) . '\', \'leave\')" > Request for Reject </a>
         					</li>';
-
             $leavedate  = explode(' to ', $item['fld_ldate']);
             $start_date = struDate($leavedate[0]);
-
             $action = "";
             if ($info['role'] == STAFF && $item['fld_lstatus'] == 'Pending') {
-
                 $action = '<div class="dropdown ms-2">
 		                        <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 		                            <i class="ti ti-dots-vertical"></i>
 		                        </button>
 		                        <ul class="dropdown-menu" style="">' . $edit . $delete . '</ul>
 		                    </div>';
-
             } else if ($info['role'] == STAFF && CURDATE <= $start_date && $item['fld_lstatus'] == "Approved" && $item['fld_req_reject'] == "") {
-
                 $action = '<div class="dropdown ms-2">
 		                        <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 		                            <i class="ti ti-dots-vertical"></i>
@@ -1143,9 +990,7 @@ class Reports extends CI_Controller {
 		                        <ul class="dropdown-menu" style="">' . $rej_req . '</ul>
 		                    </div>';
             }
-
             if ($info['role'] == ADMIN && CURDATE <= $start_date) {
-
                 $action = '<div class="dropdown ms-2">
 		                    <button class="btn btn-icon btn-light btn-sm btn-wave waves-secondary waves-effect" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 		                        <i class="ti ti-dots-vertical"></i>
@@ -1153,12 +998,10 @@ class Reports extends CI_Controller {
 		                    <ul class="dropdown-menu" style="">' . $edit . (($item['fld_lstatus'] != "Approved") ? $approve : "") . (($item['fld_lstatus'] != "Rejected") ? $reject : "") . $delete . '</ul>
 		                </div>';
             }
-
             $status = '<span class="badge bg-' . Bgcolors($item['fld_lstatus']) . '">' . $item['fld_lstatus'] . '</span>';
             if ($item['fld_req_reject'] != "") {
                 $status = '<span class="badge bg-' . Bgcolors($item['fld_lstatus']) . '">' . $item['fld_lstatus'] . '</span> <span class="badge bg-warning bi bi-info-circle-fill" data-bs-toggle="modal" data-bs-target="#RejectRequModal" data-id="' . md5($item['fld_lid']) . '" data-status="Request Reject" onclick="viewDatas(\'' . md5($item['fld_lid']) . '\', \'leave\')" > </span>';
             }
-
             $data[] = [
                 "fld_lid"         => $i,
                 "fld_create_date" => showDate($item['fld_create_date']),
@@ -1180,46 +1023,35 @@ class Reports extends CI_Controller {
         ];
         echo json_encode($response);
     }
-
     public function view_records() {
         $id   = $this->input->post('id', TRUE);
         $type = $this->input->post('type', TRUE);
-
         if ($type == 'customer') {
             $table = 'customers';
             $where = ["md5(`fld_id`)" => $id];
-
         } elseif ($type == 'staff') {
             $table = 'users';
             $where = ["md5(`fld_uid`)" => $id, 'fld_uroles' => 2];
-
         } elseif ($type == 'my_space' || $type == 'appointment') {
             $sql = "SELECT `A`.*, `C`.*, `AM`.*, `CP`.*, `U`.*, (SELECT SUM(`P`.`fld_ppaid`) FROM `payments` `P` WHERE `P`.`fld_appid` = `A`.`fld_aid`) AS `paid`, (SELECT `P`.`fld_pbalance` FROM `payments` `P` WHERE `P`.`fld_appid` = `A`.`fld_aid` ORDER BY `P`.`fld_pdate` DESC LIMIT 1) AS `balance` FROM `appointments` `A` JOIN `appointment_meta` `AM` ON `AM`.`fld_amappid` = `A`.`fld_aid` JOIN `customers` `C` ON `A`.`fld_acustid` = `C`.`fld_id` LEFT JOIN `coupons` `CP` ON `A`.`fld_acpid` = `CP`.`fld_cpid` LEFT JOIN `users` `U` ON `U`.`fld_uid` = `A`.`fld_astaffid` WHERE md5(`fld_appointid`) = '" . $id . "' ORDER BY `fld_adate` DESC";
-
         } elseif ($type == 'leave') {
             $table = 'leaves';
             $where = ["md5(`fld_lid`)" => $id];
-
         } elseif ($type == 'service') {
             $table = 'services';
             $where = ["md5(`fld_sid`)" => $id];
-
         } elseif ($type == 'attend') {
             $table = 'staff_attendance';
             $where = ['fld_sadate' => struDate($id), 'fld_sastatus' => 'H', 'fld_saflag' => ''];
         }
-
         if ($type == 'my_space' || $type == 'appointment') {
             $record = $this->Common_model->RawSQL($sql);
             $result = mergeAppointment($record);
         } else {
             $result = $this->Common_model->GetDatas($table, '*', $where);
         }
-
         echo json_encode($result);
         exit;
     }
-
     public function __destruct() {}
-
 }
