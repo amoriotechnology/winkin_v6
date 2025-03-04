@@ -25,7 +25,7 @@
 
                     <div class="col-md-6 mt-3">
                         <label for="staff_name" class="form-label">Name <span class="text-danger">*</span> </label>
-                        <input type="text" name="staff_name" id="staff_name" class="form-control" value="" oninput="AlphaOnly(this)">
+                        <input type="text" name="staff_name" id="staff_name" class="form-control" value="" oninput="AlphaWithSpaces(this)">
                         <span class="staff-error-msg text-danger"></span>
                     </div>
                     
@@ -43,7 +43,7 @@
 
                     <div class="col-md-6 mt-3">
                         <label for="staff_designation" class="form-label">Designation <span class="text-danger">*</span> </label>
-                        <input type="text" name="staff_designation" id="staff_designation" class="form-control" value="" oninput="AlphaOnly(this)">
+                        <input type="text" name="staff_designation" id="staff_designation" class="form-control" value="" oninput="AlphaWithSpaces(this)">
                         <span class="staff-error-msg text-danger"></span>
                     </div>
 

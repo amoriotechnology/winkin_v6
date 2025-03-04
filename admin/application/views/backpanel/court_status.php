@@ -44,6 +44,21 @@
     .wizard-nav{
         display: none !important; 
     }
+
+    .no-dropdown {
+    all: unset;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #5b6e00;
+    cursor: text !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: transparent;
+    padding-right: 10px;
+}
+
 </style>
 
 
@@ -931,8 +946,26 @@ function getTimeRate(starttime, duration, rate) {
 }
 
 const settingweeks = <?= (!empty(json_encode($weeks)) ? json_encode($weeks) : []); ?>;
+
+
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let yearDropdown = document.querySelector(".calendar-years");
+    let monthDropdown = document.querySelector(".calendar-months");
+
+    // Add class to remove dropdown arrow and prevent clicking
+    yearDropdown.classList.add("no-dropdown");
+    monthDropdown.classList.add("no-dropdown");
+
+    // Disable the select elements
+    yearDropdown.setAttribute("disabled", true);
+    monthDropdown.setAttribute("disabled", true);
+});
+
+
+</script>
 
 <script src="<?= base_url('../assets/js/cal_scroll.js'); ?>" ></script>
 

@@ -29,6 +29,15 @@
                         <div class="table-responsive">
                             <table id="maintain_list" class="table table-bordered table-hover w-100">
                                 <thead class="table-dark">
+                                <tr class="filter-row">
+                                        <th>Advanced<br>Search</th>
+                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
+                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
+                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
+                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
+                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
+                                        <th></th>
+                                    </tr>
                                     <tr class="text-center">
                                         <th width="3%">S.No</th>
                                         <th>Maintenance ID</th>
@@ -38,15 +47,7 @@
                                         <th>Blocked Time</th>
                                         <th>Action</th>
                                     </tr>
-                                    <tr class="filter-row">
-                                        <th></th>
-                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
-                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
-                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
-                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
-                                        <th><input type="text" class="column-search form-control" placeholder="Search"></th>
-                                        <th></th>
-                                    </tr>
+                                    
                                 </thead>
 
                             </table>
@@ -175,11 +176,6 @@ $(document).ready(function() {
                 },
             },
             {
-                    "extend": "colvis",
-                    "className": "btn-sm",
-                    "exportOptions": { "columns": ':visible' }
-            },
-            {
                 "extend": "pdf",
                 "title": "Maintenance Report",
                 "className": "btn-sm",
@@ -273,6 +269,11 @@ $(document).ready(function() {
 
                         $(win.document.body).find('div:last-child').css('page-break-after', 'auto');
                     }
+            },
+            {
+                    "extend": "colvis",
+                    "className": "btn-sm",
+                    "exportOptions": { "columns": ':visible' }
             },
         ],
         "createdRow": function(row, data, dataIndex) {

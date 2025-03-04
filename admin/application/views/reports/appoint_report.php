@@ -37,7 +37,7 @@
                             <table id="booking_list" class="table table-bordered table-hover text-nowrap w-100">
                                 <thead class="table-dark">
                                     <tr class="filter-row">
-                                        <td></td>
+                                        <td>Advanced<br>Search</td>
                                         <td><input type="text" class="column-search form-control"></td>
                                         <td><input type="text" class="column-search form-control"></td>
                                         <td><input type="text" class="column-search form-control"></td>
@@ -58,7 +58,7 @@
                                         <th>Slot Time</th>
                                         <th>Court</th>
                                         <th>Name</th>
-                                        <th>Phone</th>
+                                        <th>Phone No.</th>
                                         <th>Pay Mode</th>
                                         <th>Amount(₹)</th>
                                         <th>Status</th>
