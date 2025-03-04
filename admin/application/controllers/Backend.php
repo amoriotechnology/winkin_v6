@@ -603,6 +603,7 @@ class Backend extends CI_Controller {
 		$history = $paymode;
 		if (!empty($appid)) {
 
+			$appoint_id = $this->input->post('appoint_id');
 			/* Check already have the slot, date, time */
 			$bookedtime = '';
 			for($b = 0; $b < count($timings); $b++) {
@@ -614,8 +615,6 @@ class Backend extends CI_Controller {
 			  echo json_encode(['status' => 300, 'alert_msg' => 'Sorry, but this slot is already booked!']);
 			  exit;
 			}
-			
-			$appoint_id = $this->input->post('appoint_id');
 			
             $check = ExistorNot('customers', ['fld_phone' => $custphone]);
 			$cust_rec = $this->Common_model->GetDatas('customers', 'fld_id, fld_custid', ['fld_id !=' => ''], "`fld_id` DESC");
@@ -678,12 +677,14 @@ class Backend extends CI_Controller {
 			$this->Common_model->DeleteData('appointment_meta', ['fld_amappid' => $appid]);
 			$result  = $this->Common_model->InsertBatchData('appointment_meta', array_reverse($metavalue));
 			$this->Common_model->UpdateData('payments', ['fld_prate' => $rate, 'fld_ppaid' => $amount, 'fld_pbalance' => $balance, 'fld_phistory' => json_encode($history)], ['fld_appid' => $appid]);
-            $tomail = (!empty($check)) ? $check[0]['fld_email'] : $custemail;
+            
+			$tomail = (!empty($check)) ? $check[0]['fld_email'] : $custemail;
 			$name = (!empty($check)) ? $check[0]['fld_name'] : $custname;
             $subject = ':tada: Your Booking Has Been Rescheduled! :tada:';
-            $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $this->input->post('appoint_id'), 'court' => $admincourt, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => '', 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
+            $bookingtemplates = BookingTemplate(['name' => $name, 'appoint_id' =>  $appoint_id, 'court' => $admincourt, 'date' => showDate($court_date), 'time' => $timings, 'amount' => $newrate, 'couponAmount' => '', 'gstAmount' => $gst_amount, 'payCharge' => $payment_amount]);
             
-			$getPdf = $this->pdf_generate($this->input->post('appoint_id'));
+			$getPdf = $this->pdf_generate($appoint_id);
+			var_dump($getPdf);exit;
 			$mail = SendEmail($tomail, "", "", $subject, $bookingtemplates, $getPdf);
 			$this->Common_model->UpdateData('appointments', ['fld_conf_email' => $mail], ['fld_aid' => $appid]);
 		    
