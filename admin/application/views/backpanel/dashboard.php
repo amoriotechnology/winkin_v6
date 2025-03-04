@@ -3,10 +3,8 @@
         display: none;
     }    
 </style>
-
 <div class="main-content app-content">
     <div class="container-fluid">
-
         <!-- Start::page-header -->
         <div
             class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -15,13 +13,12 @@
             </div>
         </div>
         <!-- End::page-header -->
-
         <!-- Start:: row-1 -->
         <div class="row">
             <div class="col-xxl-12">
                 <div class="row">
                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 col-12">
-                        <div class="card custom-card border-5 rounded-4 border-top-0 border-end-0 border-bottom-0 border-success">
+                        <div class="today_booking card custom-card border-5 rounded-4 border-top-0 border-end-0 border-bottom-0 border-success">
                             <div class="card-body p-3">
                                 <div class="d-flex align-items-start justify-content-between">
                                     <div>
@@ -43,7 +40,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 col-12">
                         <div class="card custom-card border-5 rounded-4 border-top-0 border-end-0 border-bottom-0 border-primary">
                             <div class="card-body p-3">
@@ -67,7 +63,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 col-12">
                         <div class="card custom-card border-5 rounded-4 border-top-0 border-end-0 border-bottom-0 border-success">
                             <div class="card-body p-3">
@@ -89,7 +84,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 col-12">
                         <div class="card custom-card border-5 rounded-4 border-top-0 border-end-0 border-bottom-0 border-success">
                             <div class="card-body p-3">
@@ -111,7 +105,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 col-12">
                         <div class="card custom-card border-5 rounded-4 border-top-0 border-end-0 border-bottom-0 border-primary">
                             <div class="card-body p-3">
@@ -122,7 +115,6 @@
                                     </div>
                                     <div> <span class="avatar avatar-md bg-info  svg-white">
                                         <i class="bi bi-currency-rupee fs-20"></i>
-                                        
                                     </span> </div>
                                 </div>
                                 <div class="d-flex align-items-end flex-wrap justify-content-between mt-2">
@@ -134,29 +126,22 @@
                             </div>
                         </div>
                     </div>
-                
                 </div>
             </div>
         </div>
-
         <div class="row">
            <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
                 <div id="booking_chart"></div>
             </div> 
-
             <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
                 <div id="revenue_chart"></div>
             </div> 
         </div>
         <!-- End:: row-1 -->
-
     </div>
 </div>
 <!-- End::content  -->
-
-
 <script type="text/javascript">
-
 // Booking Charts
 var bookingData = <?php echo $booking_chart_data; ?>;
 var bookCount = <?php echo $bookCount; ?>;
@@ -204,24 +189,19 @@ Highcharts.chart('booking_chart', {
         }
     ]
 });
-
-
 // Revenue Charts
 var revenueData = [];
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
 <?php foreach ($monthly_revenue as $row) { ?>
     revenueData.push({
         month: '<?= date('M', strtotime($row['month'] . "-01")) ?>', 
         total: <?= $row['total_revenue'] ?>
     });
 <?php } ?>
-
 var chartData = months.map(m => {
     var found = revenueData.find(r => r.month === m);
     return found ? found.total : 0;
 });
-
 Highcharts.chart('revenue_chart', {
     chart: {
         type: 'column',
@@ -268,5 +248,4 @@ Highcharts.chart('revenue_chart', {
         }
     ]
 });
-
 </script>
