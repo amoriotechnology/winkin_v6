@@ -65,8 +65,17 @@ class Common_model extends CI_Model {
         return $query->get()->result_array();
     }
 
+    public function GetJoinDatasThreeTable($table1, $table2, $table3, $joincond1, $joincond2, $select, $where = NULL, $wherein = NULL, $groupby = NULL) {
+		$query = $this->db->select($select)->from($table1);
+		$query->join($table2, $joincond1);
+		$query->join($table3, $joincond2);
+		(!empty($groupby)) ? $query->group_by($groupby) : $query;
+		(!empty($where)) ? $query->where($where) : $query;
+		(!empty($wherein)) ? $query->where_in($wherein) : $query;
+		return $query->get()->result_array();
+    }
 
-    public function getCount($table, $where = NULL, $search = NULL, $select = "*", $col_where = NULL ) {
+   public function getCount($table, $where = NULL, $search = NULL, $select = "*", $col_where = NULL ) {
         $query = $this->db->select($select)->from($table);
         (!empty($where)) ? $query->where($where) : $query;
         (!empty($col_where)) ? $query->where($col_where) : $query;

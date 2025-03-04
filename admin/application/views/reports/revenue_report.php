@@ -36,6 +36,7 @@
                                         <th><input type="text" class="column-search form-control"></th>
                                         <th><input type="text" class="column-search form-control"></th>
                                         <th><input type="text" class="column-search form-control"></th>
+                                        <th><input type="text" class="column-search form-control"></th>
                                         <th></th>
                                         <th></th>
                                         <th></th>
@@ -49,6 +50,7 @@
                                         <th>Name</th>
                                         <th>Phone</th>
                                         <th>Pay mode</th>
+                                        <th>Payment Date</th>
                                         <th>Amount(₹)</th>
                                         <th>GST Amount(₹)</th>
                                         <th>Total Amount(₹)</th>
@@ -56,7 +58,7 @@
                                 </thead> 
                                 <tfoot>
                                     <tr>
-                                        <th colspan="8" style="font-weight: bold; text-align: right !important;">Total</th>
+                                        <th colspan="9" style="font-weight: bold; text-align: right !important;">Total</th>
                                         <th id="totalAmount" style="font-weight: bold">0.00</th>
                                         <th id="totalGST" style="font-weight: bold">0.00</th>
                                         <th id="totalTotal" style="font-weight: bold">0.00</th>
@@ -121,6 +123,7 @@ $(document).ready(function() {
             { "data": "fld_name" },
             { "data": "fld_phone" },
             { "data": "fld_apaymode" },
+            { "data": "fld_pdate" },
             { "data": "fld_arate" , "className": "style-column"},
             { "data": "fld_gst_amt" },
             { "data": "fld_atotal" },
@@ -238,17 +241,17 @@ $(document).ready(function() {
                     win.document.head.appendChild(style);
 
                     var api = $('#revenue_list').DataTable();
-                    var totalAmount = api.column(8).data().reduce(function(a, b) {
+                    var totalAmount = api.column(9).data().reduce(function(a, b) {
                         return parseFloat(a) + parseFloat(b);
                     }, 0);
 
-                    var totalGST = api.column(9).data().reduce(function(a, b) {
+                    var totalGST = api.column(10).data().reduce(function(a, b) {
                         return parseFloat(a) + parseFloat(b);
                     }, 0);
 
            
 
-                    var totalTotal = api.column(10).data().reduce(function(a, b) {
+                    var totalTotal = api.column(11).data().reduce(function(a, b) {
                         console.log(totalTotal);
                         return parseFloat(a) + parseFloat(b);
                     }, 0);
@@ -276,24 +279,24 @@ $(document).ready(function() {
         "footerCallback": function(row, data, start, end, display) {
             var api = this.api();
 
-            var totalAmount = api.column(8).data().reduce(function(a, b) {
+            var totalAmount = api.column(9).data().reduce(function(a, b) {
                 return parseFloat(a) + parseFloat(b);
             }, 0);
 
-            var totalGST = api.column(9).data().reduce(function(a, b) {
+            var totalGST = api.column(10).data().reduce(function(a, b) {
                 return parseFloat(a) + parseFloat(b);
             }, 0);
 
         
 
-            var totalTotal = api.column(10).data().reduce(function(a, b) {
+            var totalTotal = api.column(11).data().reduce(function(a, b) {
                 return parseFloat(a) + parseFloat(b);
             }, 0);
 
-            $(api.column(8).footer()).html(totalAmount.toFixed(2));
-            $(api.column(9).footer()).html(totalGST.toFixed(2));
+            $(api.column(9).footer()).html(totalAmount.toFixed(2));
+            $(api.column(10).footer()).html(totalGST.toFixed(2));
          //   $(api.column(9).footer()).html(totalDiscount.toFixed(2));
-            $(api.column(10).footer()).html(totalTotal.toFixed(2));
+            $(api.column(11).footer()).html(totalTotal.toFixed(2));
         }
     });
 
